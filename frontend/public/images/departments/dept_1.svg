@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad_1" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1e4287"/>
+      <stop offset="100%" stop-color="#0f2b5c"/>
+    </radialGradient>
+    
+    <!-- Outer Golden Ring Gradient -->
+    <linearGradient id="goldGrad_1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="shadow_1" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Circular Path for Top Text: बिहार सरकार • GOVT OF BIHAR -->
+    <path id="textArcTop_1" d="M 32 100 A 68 68 0 0 1 168 100" fill="none"/>
+  </defs>
+
+  <!-- Outer Seal Circle with Gold Rim -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGrad_1)" stroke="url(#goldGrad_1)" stroke-width="5" filter="url(#shadow_1)"/>
+
+  <!-- Beaded Inner Border Ring -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#fde68a" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.8"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#goldGrad_1)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Top Arc Banner Text: बिहार सरकार • GOVT OF BIHAR -->
+  <text font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10.5" font-weight="900" fill="#fef08a" letter-spacing="1.2">
+    <textPath href="#textArcTop_1" startOffset="50%" text-anchor="middle">
+      बिहार सरकार • GOVT OF BIHAR
+    </textPath>
+  </text>
+
+  <!-- Central Symbol / Heraldic Emblem -->
+  <g filter="url(#shadow_1)">
+    
+            <!-- Bodhi Tree of Bihar GAD -->
+            <path d="M100 135 L100 110 M100 110 Q90 100 80 92 Q70 85 62 88 Q55 92 60 100 Q68 110 82 110 Z" fill="#f59e0b" opacity="0.9"/>
+            <path d="M100 110 Q110 100 120 92 Q130 85 138 88 Q145 92 140 100 Q132 110 118 110 Z" fill="#f59e0b" opacity="0.9"/>
+            <path d="M100 105 Q92 90 85 75 Q80 65 88 62 Q96 60 100 70 Q104 60 112 62 Q120 65 115 75 Q108 90 100 105 Z" fill="#fbbf24"/>
+            <path d="M100 138 L95 145 L105 145 Z" fill="#d97706"/>
+            <!-- Pedestal / Swastika sacred dots -->
+            <circle cx="75" cy="125" r="3.5" fill="#f59e0b"/>
+            <circle cx="125" cy="125" r="3.5" fill="#f59e0b"/>
+            <rect x="70" y="138" width="60" height="5" rx="2" fill="#f59e0b"/>
+            <rect x="76" y="144" width="48" height="4" rx="2" fill="#d97706"/>
+        
+  </g>
+
+  <!-- Bottom Department Ribbon Banner -->
+  <g transform="translate(0, 0)">
+    <!-- Banner Backdrop -->
+    <path d="M 36 156 Q 100 176 164 156 L 158 178 Q 100 196 42 178 Z" fill="#0f172a" stroke="url(#goldGrad_1)" stroke-width="1.5"/>
+    
+    <!-- Department Code & Hindi Name Text -->
+    <text x="100" y="172" font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">
+      सामान्य प्रशासन
+    </text>
+  </g>
+
+  <!-- Number Badge at Bottom Center -->
+  <circle cx="100" cy="186" r="8" fill="#d97706" stroke="#ffffff" stroke-width="1"/>
+  <text x="100" y="189.5" font-family="Arial, sans-serif" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">
+    01
+  </text>
+</svg>

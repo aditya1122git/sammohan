@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  jansetu-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jansetu-bihar-portal
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=sammohan
+      - JWT_SECRET=jansetu-bihar-production-secret-token-key-2026
+      - MAX_UPLOAD_SIZE_MB=200
+    volumes:
+      - jansetu-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  jansetu-uploads:
+    driver: local

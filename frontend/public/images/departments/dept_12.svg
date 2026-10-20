@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad_12" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </radialGradient>
+    
+    <!-- Outer Golden Ring Gradient -->
+    <linearGradient id="goldGrad_12" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="shadow_12" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Circular Path for Top Text: बिहार सरकार • GOVT OF BIHAR -->
+    <path id="textArcTop_12" d="M 32 100 A 68 68 0 0 1 168 100" fill="none"/>
+  </defs>
+
+  <!-- Outer Seal Circle with Gold Rim -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGrad_12)" stroke="url(#goldGrad_12)" stroke-width="5" filter="url(#shadow_12)"/>
+
+  <!-- Beaded Inner Border Ring -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#fde68a" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.8"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#goldGrad_12)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Top Arc Banner Text: बिहार सरकार • GOVT OF BIHAR -->
+  <text font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10.5" font-weight="900" fill="#fef08a" letter-spacing="1.2">
+    <textPath href="#textArcTop_12" startOffset="50%" text-anchor="middle">
+      बिहार सरकार • GOVT OF BIHAR
+    </textPath>
+  </text>
+
+  <!-- Central Symbol / Heraldic Emblem -->
+  <g filter="url(#shadow_12)">
+    
+            <!-- RTPS Digital Certificate & Green Tick -->
+            <rect x="74" y="70" width="52" height="60" rx="4" fill="#ffffff" stroke="#fbbf24" stroke-width="2"/>
+            <line x1="82" y1="80" x2="118" y2="80" stroke="#94a3b8" stroke-width="2.5"/>
+            <line x1="82" y1="88" x2="114" y2="88" stroke="#94a3b8" stroke-width="2.5"/>
+            <line x1="82" y1="96" x2="108" y2="96" stroke="#94a3b8" stroke-width="2.5"/>
+            <circle cx="112" cy="114" r="14" fill="#16a34a" stroke="#ffffff" stroke-width="2"/>
+            <path d="M106 114 L110 118 L118 110" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        
+  </g>
+
+  <!-- Bottom Department Ribbon Banner -->
+  <g transform="translate(0, 0)">
+    <!-- Banner Backdrop -->
+    <path d="M 36 156 Q 100 176 164 156 L 158 178 Q 100 196 42 178 Z" fill="#0f172a" stroke="url(#goldGrad_12)" stroke-width="1.5"/>
+    
+    <!-- Department Code & Hindi Name Text -->
+    <text x="100" y="172" font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">
+      प्रशासनिक सुधार (RTPS)
+    </text>
+  </g>
+
+  <!-- Number Badge at Bottom Center -->
+  <circle cx="100" cy="186" r="8" fill="#d97706" stroke="#ffffff" stroke-width="1"/>
+  <text x="100" y="189.5" font-family="Arial, sans-serif" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">
+    12
+  </text>
+</svg>

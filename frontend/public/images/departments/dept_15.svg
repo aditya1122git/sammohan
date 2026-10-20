@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad_15" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </radialGradient>
+    
+    <!-- Outer Golden Ring Gradient -->
+    <linearGradient id="goldGrad_15" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="shadow_15" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Circular Path for Top Text: बिहार सरकार • GOVT OF BIHAR -->
+    <path id="textArcTop_15" d="M 32 100 A 68 68 0 0 1 168 100" fill="none"/>
+  </defs>
+
+  <!-- Outer Seal Circle with Gold Rim -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGrad_15)" stroke="url(#goldGrad_15)" stroke-width="5" filter="url(#shadow_15)"/>
+
+  <!-- Beaded Inner Border Ring -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#fde68a" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.8"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#goldGrad_15)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Top Arc Banner Text: बिहार सरकार • GOVT OF BIHAR -->
+  <text font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10.5" font-weight="900" fill="#fef08a" letter-spacing="1.2">
+    <textPath href="#textArcTop_15" startOffset="50%" text-anchor="middle">
+      बिहार सरकार • GOVT OF BIHAR
+    </textPath>
+  </text>
+
+  <!-- Central Symbol / Heraldic Emblem -->
+  <g filter="url(#shadow_15)">
+    
+            <!-- Rural Paved Road through Green Farm Fields -->
+            <path d="M64 136 C74 110 88 100 96 86 C102 76 104 68 104 68" stroke="#f1f5f9" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <path d="M64 136 C74 110 88 100 96 86 C102 76 104 68 104 68" stroke="#334155" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <!-- Village Trees -->
+            <circle cx="70" cy="85" r="9" fill="#22c55e"/>
+            <circle cx="128" cy="100" r="11" fill="#15803d"/>
+            <circle cx="122" cy="78" r="8" fill="#4ade80"/>
+        
+  </g>
+
+  <!-- Bottom Department Ribbon Banner -->
+  <g transform="translate(0, 0)">
+    <!-- Banner Backdrop -->
+    <path d="M 36 156 Q 100 176 164 156 L 158 178 Q 100 196 42 178 Z" fill="#0f172a" stroke="url(#goldGrad_15)" stroke-width="1.5"/>
+    
+    <!-- Department Code & Hindi Name Text -->
+    <text x="100" y="172" font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">
+      ग्रामीण कार्य विभाग
+    </text>
+  </g>
+
+  <!-- Number Badge at Bottom Center -->
+  <circle cx="100" cy="186" r="8" fill="#d97706" stroke="#ffffff" stroke-width="1"/>
+  <text x="100" y="189.5" font-family="Arial, sans-serif" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">
+    15
+  </text>
+</svg>

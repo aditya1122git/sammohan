@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Gradient -->
+    <radialGradient id="bgGrad_13" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </radialGradient>
+    
+    <!-- Outer Golden Ring Gradient -->
+    <linearGradient id="goldGrad_13" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="shadow_13" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Circular Path for Top Text: बिहार सरकार • GOVT OF BIHAR -->
+    <path id="textArcTop_13" d="M 32 100 A 68 68 0 0 1 168 100" fill="none"/>
+  </defs>
+
+  <!-- Outer Seal Circle with Gold Rim -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGrad_13)" stroke="url(#goldGrad_13)" stroke-width="5" filter="url(#shadow_13)"/>
+
+  <!-- Beaded Inner Border Ring -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#fde68a" stroke-width="1.2" stroke-dasharray="3,3" opacity="0.8"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#goldGrad_13)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Top Arc Banner Text: बिहार सरकार • GOVT OF BIHAR -->
+  <text font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10.5" font-weight="900" fill="#fef08a" letter-spacing="1.2">
+    <textPath href="#textArcTop_13" startOffset="50%" text-anchor="middle">
+      बिहार सरकार • GOVT OF BIHAR
+    </textPath>
+  </text>
+
+  <!-- Central Symbol / Heraldic Emblem -->
+  <g filter="url(#shadow_13)">
+    
+            <!-- 4-Lane Highway with Bridge Span -->
+            <polygon points="88,68 112,68 126,134 74,134" fill="#1e293b"/>
+            <!-- Road Dashed Centerline -->
+            <line x1="100" y1="72" x2="100" y2="80" stroke="#facc15" stroke-width="2"/>
+            <line x1="100" y1="86" x2="100" y2="96" stroke="#facc15" stroke-width="2.5"/>
+            <line x1="100" y1="104" x2="100" y2="116" stroke="#facc15" stroke-width="3"/>
+            <line x1="100" y1="122" x2="100" y2="134" stroke="#facc15" stroke-width="3.5"/>
+            <!-- Bridge Arch -->
+            <path d="M64 100 Q100 80 136 100" stroke="#fbbf24" stroke-width="3" fill="none"/>
+            <line x1="74" y1="100" x2="74" y2="124" stroke="#fbbf24" stroke-width="2"/>
+            <line x1="126" y1="100" x2="126" y2="124" stroke="#fbbf24" stroke-width="2"/>
+        
+  </g>
+
+  <!-- Bottom Department Ribbon Banner -->
+  <g transform="translate(0, 0)">
+    <!-- Banner Backdrop -->
+    <path d="M 36 156 Q 100 176 164 156 L 158 178 Q 100 196 42 178 Z" fill="#0f172a" stroke="url(#goldGrad_13)" stroke-width="1.5"/>
+    
+    <!-- Department Code & Hindi Name Text -->
+    <text x="100" y="172" font-family="'Mukta', 'Noto Sans Devanagari', Arial, sans-serif" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">
+      पथ निर्माण विभाग
+    </text>
+  </g>
+
+  <!-- Number Badge at Bottom Center -->
+  <circle cx="100" cy="186" r="8" fill="#d97706" stroke="#ffffff" stroke-width="1"/>
+  <text x="100" y="189.5" font-family="Arial, sans-serif" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">
+    13
+  </text>
+</svg>
