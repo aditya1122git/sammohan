@@ -34,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Home className="w-5 h-5" />
           </button>
           <span className="font-bold text-sm tracking-wide hidden sm:inline-block px-2 border-l border-blue-400">
-            {language === 'hi' ? 'सम्मोहन डैशबोर्ड' : 'Sammohana Dashboard'}
+            {language === 'hi' ? 'सम्मोहन डैशबोर्ड' : 'Sammohan Dashboard'}
           </span>
         </div>
 

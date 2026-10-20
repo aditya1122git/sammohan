@@ -18,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="bg-white py-3 border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-        {/* Brand Section: Bihar Government Seal + Sammohana Wordmark */}
+        {/* Brand Section: Bihar Government Seal + Sammohan Wordmark */}
         <div className="flex items-center gap-3 sm:gap-4 flex-wrap sm:flex-nowrap justify-center sm:justify-start">
           <div className="flex items-center gap-2.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
             <img

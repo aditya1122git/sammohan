@@ -403,7 +403,7 @@ export const ModernBiharMission2045: React.FC<ModernBiharMission2045Props> = ({
               <div className="text-xs text-amber-100 font-medium mt-1">
                 {language === 'hi'
                   ? 'सम्मोहन पोर्टल: 38 जिलों में प्रत्येक घोषणा एवं परियोजना का रीयल-टाइम पारदर्शी अनुश्रवण'
-                  : 'Sammohana Portal: Real-Time Transparent Tracking of Commitments in All 38 Districts'}
+                  : 'Sammohan Portal: Real-Time Transparent Tracking of Commitments in All 38 Districts'}
               </div>
             </div>
           </div>

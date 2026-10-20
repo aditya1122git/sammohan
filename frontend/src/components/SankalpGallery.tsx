@@ -279,7 +279,7 @@ export const SankalpGallery: React.FC<SankalpGalleryProps> = ({
             className="hidden sm:flex items-center gap-1.5 text-xs text-blue-200 hover:text-amber-300 font-medium transition"
           >
             <span>
-              {language === 'hi' ? 'स्रोत: मुख्यमंत्री सम्मोहन डैशबोर्ड' : 'Source: CM Sammohana Dashboard'}
+              {language === 'hi' ? 'स्रोत: मुख्यमंत्री सम्मोहन डैशबोर्ड' : 'Source: CM Sammohan Dashboard'}
             </span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
@@ -293,7 +293,7 @@ export const SankalpGallery: React.FC<SankalpGalleryProps> = ({
           <p className="text-xs sm:text-sm text-blue-200/80 max-w-xl mx-auto">
             {language === 'hi'
               ? 'सम्मोहन — विकास की झलक, आधिकारिक फोटो गैलरी'
-              : 'Sammohana — Glimpses of development, official photographic archive'}
+              : 'Sammohan — Glimpses of development, official photographic archive'}
           </p>
         </div>
 

@@ -210,7 +210,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
 
               <h2 className="text-2xl font-black tracking-tight leading-snug">
-                सम्मोहन &bull; Sammohana
+                सम्मोहन &bull; Sammohan
               </h2>
               <p className="text-sm text-blue-200 mt-1 font-medium">
                 Announcement & Project Tracking Dashboard
@@ -242,7 +242,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
             {/* Bottom Security Note */}
             <div className="relative z-10 pt-6 mt-6 border-t border-white/10 text-[11px] text-blue-300">
-              <div>Government of Bihar &bull; Sammohana Portal</div>
+              <div>Government of Bihar &bull; Sammohan Portal</div>
               <div className="text-[10px] text-blue-300/70 mt-0.5">&copy; {new Date().getFullYear()} Government of Bihar. All Rights Reserved</div>
             </div>
           </div>
@@ -396,7 +396,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                         <span>{language === 'hi' ? 'प्रमाणीकरण हो रहा है...' : 'Authenticating Credentials...'}</span>
                       </>
                     ) : (
-                      <span>{language === 'hi' ? 'पोर्टल में प्रवेश करें' : 'Sign In to Sammohana Project Tracking Portal'}</span>
+                      <span>{language === 'hi' ? 'पोर्टल में प्रवेश करें' : 'Sign In to Sammohan Project Tracking Portal'}</span>
                     )}
                   </button>
                 </form>

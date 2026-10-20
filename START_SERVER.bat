@@ -1,9 +1,9 @@
 @echo off
-title JanSetu Bihar Governance Portal - Production Server
+title Sammohan Governance Portal - Production Server
 color 0A
 
 echo ======================================================================
-echo    JanSetu Bihar - Integrated Governance & Project Tracking Portal
+echo    Sammohan - Integrated Governance & Project Tracking Portal
 echo                  Government of Bihar Production Server
 echo ======================================================================
 echo.
@@ -25,7 +25,7 @@ set NODE_ENV=production
 set PORT=5000
 set JWT_SECRET=bihar_assembly_production_secure_jwt_secret_2026
 
-echo [*] Starting JanSetu Bihar Production Server on http://localhost:5000 ...
+echo [*] Starting Sammohan Production Server on http://localhost:5000 ...
 echo [*] Press Ctrl+C in this window to stop the server at any time.
 echo.
 

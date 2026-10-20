@@ -56,10 +56,11 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
   const [internalProjects, setInternalProjects] = useState<ProjectAnnouncement[]>(projects);
   const [isLoading, setIsLoading] = useState(projects.length === 0);
   const [isDeletingId, setIsDeletingId] = useState<number | null>(null);
+  const safeText = (value: unknown): string => typeof value === 'string' ? value : '';
 
   const handleDelete = async (p: ProjectAnnouncement) => {
     const confirmMsg = language === 'hi'
-      ? `क्या आप वाकई परियोजना ${p.referenceId} (${p.department} - ${p.commitment.substring(0, 40)}...) को डेटाबेस से स्थायी रूप से हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।`
+      ? `क्या आप वाकई परियोजना ${p.referenceId} (${p.department} - ${safeText(p.commitment).substring(0, 40)}...) को डेटाबेस से स्थायी रूप से हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।`
       : `Are you sure you want to permanently delete project ${p.referenceId} (${p.department}) from the database? This action cannot be undone.`;
 
     if (!window.confirm(confirmMsg)) {
@@ -103,8 +104,6 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
         .finally(() => setIsLoading(false));
     }
   }, [projects, isOpen]);
-
-  if (!isOpen) return null;
 
   // Extract unique departments and sources for filter dropdowns
   const departments = useMemo(() => {
@@ -162,19 +161,21 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase();
         const matches =
-          p.referenceId.toLowerCase().includes(q) ||
-          p.commitment.toLowerCase().includes(q) ||
-          p.department.toLowerCase().includes(q) ||
-          p.location.toLowerCase().includes(q) ||
-          (p.delayOrObstacle && p.delayOrObstacle.toLowerCase().includes(q)) ||
-          p.source.toLowerCase().includes(q) ||
-          p.nextMilestone.toLowerCase().includes(q);
+          safeText(p.referenceId).toLowerCase().includes(q) ||
+          safeText(p.commitment).toLowerCase().includes(q) ||
+          safeText(p.department).toLowerCase().includes(q) ||
+          safeText(p.location).toLowerCase().includes(q) ||
+          safeText(p.delayOrObstacle).toLowerCase().includes(q) ||
+          safeText(p.source).toLowerCase().includes(q) ||
+          safeText(p.nextMilestone).toLowerCase().includes(q);
         if (!matches) return false;
       }
 
       return true;
     });
-  }, [projects, activeTab, selectedDept, selectedStage, selectedSource, searchTerm]);
+  }, [internalProjects, activeTab, selectedDept, selectedStage, selectedSource, searchTerm]);
+
+  if (!isOpen) return null;
 
   // Export CSV
   const handleExportCSV = () => {
@@ -196,18 +197,18 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
 
     const rows = filteredProjects.map(p => [
       `"${p.referenceId}"`,
-      `"${p.department.replace(/"/g, '""')}"`,
-      `"${p.commitment.replace(/"/g, '""')}"`,
-      `"${(p.location + (p.beneficiaries ? ' | ' + p.beneficiaries : '')).replace(/"/g, '""')}"`,
-      `"${p.financialStatus.replace(/"/g, '""')}"`,
+      `"${safeText(p.department).replace(/"/g, '""')}"`,
+      `"${safeText(p.commitment).replace(/"/g, '""')}"`,
+      `"${(safeText(p.location) + (p.beneficiaries ? ' | ' + p.beneficiaries : '')).replace(/"/g, '""')}"`,
+      `"${safeText(p.financialStatus).replace(/"/g, '""')}"`,
       p.sanctionedAmountCr,
       p.utilizedAmountCr,
       p.currentStage,
       p.verifiedProgress,
-      `"${p.nextMilestone.replace(/"/g, '""')}"`,
-      `"${(p.delayOrObstacle || 'None').replace(/"/g, '""')}"`,
-      `"${p.source.replace(/"/g, '""')}"`,
-      `"${p.communicationStatus.replace(/"/g, '""')}"`
+      `"${safeText(p.nextMilestone).replace(/"/g, '""')}"`,
+      `"${safeText(p.delayOrObstacle) || 'None'}"`,
+      `"${safeText(p.source).replace(/"/g, '""')}"`,
+      `"${safeText(p.communicationStatus).replace(/"/g, '""')}"`
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -444,7 +445,7 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
                 {language === 'hi' ? 'डेटाबेस से घोषणाएँ एवं परियोजनाएँ लोड हो रही हैं...' : 'Loading announcements and projects from database...'}
               </div>
             </div>
-          ) : projects.length === 0 ? (
+          ) : internalProjects.length === 0 ? (
             <div className="p-16 text-center text-slate-400 space-y-4 max-w-lg mx-auto">
               <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-600 shadow-inner">
                 <Database className="w-8 h-8" />

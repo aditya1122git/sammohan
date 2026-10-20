@@ -1,10 +1,10 @@
-# 🏛️ JanSetu Bihar — Official Governance Portal & Project Tracking Dashboard
+# 🏛️ Sammohan — Official Governance Portal & Project Tracking Dashboard
 ### सम्पूर्ण डेप्लॉयमेंट गाइड (Comprehensive Production Deployment Guide)
 
 ---
 
 ## 📋 अवलोकन (Overview)
-यह पैकेज **जनसेतु बिहार / सम्मोहन** (JanSetu Bihar Portal) का पूर्णतः संकलित, प्रोडक्शन-रेडी डेप्लॉयमेंट पैकेज है।
+यह पैकेज **सम्मोहन** (Sammohan Portal) का पूर्णतः संकलित, प्रोडक्शन-रेडी डेप्लॉयमेंट पैकेज है।
 इसमें फ़्रंटएंड, बैकएंड (Express Node.js), MongoDB डेटाबेस, सार्वजनिक असेट्स, तथा डॉकर/ग्निक्स/पीएम2 विन्यास पूर्ण रूप से एकीकृत हैं।
 
 ---
@@ -52,23 +52,28 @@ pm2 startup
 यदि आप Docker का उपयोग कर रहे हैं:
 ```bash
 # कंटेनर बनाएं और बैकग्राउंड में चलाएं
-docker-compose up -d
+cp .env.example .env
+nano .env
+docker compose up -d --build
 
 # स्थिति जांचें
-docker-compose ps
+docker compose ps
 
 # लॉग्स देखें
-docker-compose logs -f
+docker compose logs -f sammohan-portal
+
+# Redeploy after uploading or pulling new code
+docker compose up -d --build --remove-orphans
 ```
 पोर्ट: `http://<YOUR_SERVER_IP>:5000`
 
 ---
 
 ## 🌐 4. Nginx रिवर्स प्रॉक्सी सेटअप (Nginx Reverse Proxy)
-पैकेज में शामिल **`nginx.conf`** को `/etc/nginx/sites-available/jansetu` में कॉपी करें और सिम्लिंक बनाएं:
+पैकेज में शामिल **`nginx.conf`** को `/etc/nginx/sites-available/sammohan` में कॉपी करें और सिम्लिंक बनाएं:
 ```bash
-sudo cp nginx.conf /etc/nginx/sites-available/jansetu
-sudo ln -s /etc/nginx/sites-available/jansetu /etc/nginx/sites-enabled/
+sudo cp nginx.conf /etc/nginx/sites-available/sammohan
+sudo ln -s /etc/nginx/sites-available/sammohan /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -87,7 +92,7 @@ sudo systemctl reload nginx
 ## 📁 6. पैकेज डायरेक्टरी संरचना (Directory Structure)
 
 ```
-JanSetu-Bihar-Deployment/
+Sammohan-Deployment/
 ├── START_SERVER.bat          <- विंडोज़ 1-क्लिक स्टार्टर
 ├── START_SERVER.sh           <- लिनक्स/वीपीएस स्टार्टर
 ├── DEPLOYMENT_GUIDE.md       <- विस्तृत डेप्लॉयमेंट मार्गदर्शिका

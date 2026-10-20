@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const [language, setLanguage] = useState<'hi' | 'en'>('hi');
+  const [language, setLanguage] = useState<'hi' | 'en'>('en');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isVerifyingSession, setIsVerifyingSession] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -88,41 +88,41 @@ export const App: React.FC = () => {
     document.documentElement.lang = language;
   }, [language]);
 
-  // Official JanSetu Bihar Slides (from https://jansetubihar.in/ - Dashboard Only)
-  const jansetuSlides = [
+  // Official Sammohan dashboard slides
+  const sammohanSlides = [
     {
-      id: 'jansetu_slide_2',
+      id: 'sammohan_slide_2',
       img: '/assets/Web_Images/Slide2.webp',
-      alt: 'बढ़ता बिहार, बदलता बिहार — JanSetu Bihar',
+      alt: 'बढ़ता बिहार, बदलता बिहार — Sammohan',
     },
     {
-      id: 'jansetu_slide_1',
+      id: 'sammohan_slide_1',
       img: '/assets/Web_Images/Slide1.webp',
-      alt: 'सम्राट का विज़न, नए बिहार का मिशन — JanSetu Bihar',
+      alt: 'सम्राट का विज़न, नए बिहार का मिशन — Sammohan',
     },
     {
-      id: 'jansetu_slide_3',
+      id: 'sammohan_slide_3',
       img: '/assets/Web_Images/Slide3.webp',
-      alt: 'सम्राट की हुंकार, विकास को मिली रफ़्तार — JanSetu Bihar',
+      alt: 'सम्राट की हुंकार, विकास को मिली रफ़्तार — Sammohan',
     },
     {
-      id: 'jansetu_slide_4',
+      id: 'sammohan_slide_4',
       img: '/assets/Web_Images/Slide4.webp',
-      alt: 'सम्राट चौधरी की पहचान विकास, सुशासन और स्वाभिमान — JanSetu Bihar',
+      alt: 'सम्राट चौधरी की पहचान विकास, सुशासन और स्वाभिमान — Sammohan',
     },
   ];
 
   const [currentDashSlide, setCurrentDashSlide] = useState(0);
   const [isDashSlidePaused, setIsDashSlidePaused] = useState(false);
 
-  // Auto-rotate dashboard slide every 4.5s (from https://jansetubihar.in/)
+  // Auto-rotate Sammohan dashboard slides every 4.5s
   useEffect(() => {
     if (isDashSlidePaused) return;
     const interval = setInterval(() => {
-      setCurrentDashSlide((prev) => (prev + 1) % jansetuSlides.length);
+      setCurrentDashSlide((prev) => (prev + 1) % sammohanSlides.length);
     }, 4500);
     return () => clearInterval(interval);
-  }, [isDashSlidePaused, jansetuSlides.length]);
+  }, [isDashSlidePaused, sammohanSlides.length]);
 
   // Session verification and initial data load
   useEffect(() => {
@@ -582,7 +582,7 @@ export const App: React.FC = () => {
       ) : (
         <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
           
-          {/* Official JanSetu Bihar Slides (from https://jansetubihar.in/ - on top in dashboard only) */}
+          {/* Official Sammohan slides shown at the top of the dashboard */}
           <div
             className="w-full relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200/90 bg-slate-950 group my-2"
             onMouseEnter={() => setIsDashSlidePaused(true)}
@@ -593,7 +593,7 @@ export const App: React.FC = () => {
               className="flex w-full transition-transform duration-700 ease-in-out"
               style={{ transform: `translateX(-${currentDashSlide * 100}%)` }}
             >
-              {jansetuSlides.map((slide, sIdx) => (
+              {sammohanSlides.map((slide, sIdx) => (
                 <div
                   key={slide.id}
                   className="w-full flex-shrink-0 relative h-[240px] sm:h-[320px] md:h-[380px] lg:h-[420px] bg-slate-950 flex items-center justify-center overflow-hidden"
@@ -619,7 +619,7 @@ export const App: React.FC = () => {
             {/* Left Previous Arrow */}
             <button
               type="button"
-              onClick={() => setCurrentDashSlide((prev) => (prev - 1 + jansetuSlides.length) % jansetuSlides.length)}
+              onClick={() => setCurrentDashSlide((prev) => (prev - 1 + sammohanSlides.length) % sammohanSlides.length)}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center backdrop-blur-sm opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20 shadow-md cursor-pointer active:scale-95"
               aria-label="Previous Slide"
               title="पिछली स्लाइड"
@@ -630,7 +630,7 @@ export const App: React.FC = () => {
             {/* Right Next Arrow */}
             <button
               type="button"
-              onClick={() => setCurrentDashSlide((prev) => (prev + 1) % jansetuSlides.length)}
+              onClick={() => setCurrentDashSlide((prev) => (prev + 1) % sammohanSlides.length)}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center backdrop-blur-sm opacity-90 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 z-20 shadow-md cursor-pointer active:scale-95"
               aria-label="Next Slide"
               title="अगली स्लाइड"
@@ -641,7 +641,7 @@ export const App: React.FC = () => {
             {/* Bottom Controls Bar (Indicator Pills + Counter) */}
             <div className="absolute bottom-3 inset-x-0 flex items-center justify-center z-20 pointer-events-none">
               <div className="inline-flex items-center gap-2.5 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-white shadow-xl pointer-events-auto">
-                {jansetuSlides.map((_, dotIdx) => (
+                {sammohanSlides.map((_, dotIdx) => (
                   <button
                     key={dotIdx}
                     type="button"
@@ -657,7 +657,7 @@ export const App: React.FC = () => {
                 ))}
 
                 <span className="text-xs font-mono font-bold text-amber-300 pl-1 border-l border-white/20">
-                  {String(currentDashSlide + 1).padStart(2, '0')} / {String(jansetuSlides.length).padStart(2, '0')}
+                  {String(currentDashSlide + 1).padStart(2, '0')} / {String(sammohanSlides.length).padStart(2, '0')}
                 </span>
               </div>
             </div>

@@ -18,7 +18,7 @@ import { connectDatabase, db } from './database/mongo';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-console.log('🚀 Starting E-Sewa Tarapur Server...');
+console.log('🚀 Starting Sammohan Server...');
 console.log('⚙️ Configuring middleware...');
 
 // Security Hardening Headers
@@ -180,7 +180,7 @@ app.get('/api/health', async (req, res) => {
   const maxMb = await getEffectiveMaxUploadSizeMb();
   res.json({
     status: 'ONLINE',
-    system: 'Bihar Government — JanSetu Bihar Announcement & Project Tracking Dashboard',
+    system: 'Bihar Government — Sammohan Announcement & Project Tracking Dashboard',
     version: '2.0.0',
     maxUploadSizeMb: maxMb,
     timestamp: new Date().toISOString()

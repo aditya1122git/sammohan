@@ -201,7 +201,7 @@ router.post('/', requireDataEntryOrAdmin, async (req: AuthenticatedRequest, res:
         documents: documents ? (typeof documents === 'string' ? documents : JSON.stringify(documents)) : null,
         dateReceived: receivedDateObj,
         nextFollowUpDate: defaultFollowUp,
-        lastActionTaken: 'Record registered in Sammohana Bihar portal'
+        lastActionTaken: 'Record registered in Sammohan Bihar portal'
       },
       include: {
         district: true,
@@ -712,7 +712,7 @@ router.get('/export/csv', async (req: AuthenticatedRequest, res: Response) => {
 
     const csvData = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="JanSetu_Bihar_Sammohana_Applications_Export.csv"');
+    res.setHeader('Content-Disposition', 'attachment; filename="Sammohan_Applications_Export.csv"');
     res.send(csvData);
   } catch (error: any) {
     res.status(500).json({ error: 'Error exporting CSV' });

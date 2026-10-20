@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# JanSetu Bihar - Production Server Starter for Linux / VPS / macOS
+# Sammohan - Production Server Starter for Linux / VPS / macOS
 set -e
 
 echo "======================================================================"
-echo "   JanSetu Bihar - Integrated Governance & Project Tracking Portal"
+echo "   Sammohan - Integrated Governance & Project Tracking Portal"
 echo "                 Government of Bihar Production Server"
 echo "======================================================================"
 

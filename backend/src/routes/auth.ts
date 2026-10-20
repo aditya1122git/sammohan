@@ -279,7 +279,7 @@ router.post('/forgot-password', async (req, res) => {
       // Safe response to prevent account enumeration
       return res.json({
         success: true,
-        message: 'If the email is registered in the Sammohana Bihar portal, a password reset token has been generated.'
+        message: 'If the email is registered in the Sammohan Bihar portal, a password reset token has been generated.'
       });
     }
 

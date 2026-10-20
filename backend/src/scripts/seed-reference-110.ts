@@ -3,7 +3,7 @@ import { connectDatabase, db, disconnectDatabase } from '../database/mongo';
 
 async function seed110Applications() {
   await connectDatabase();
-  console.log('=== SEEDING JANSETU BIHAR 110 REFERENCE APPLICATIONS ===');
+  console.log('=== SEEDING SAMMOHAN 110 REFERENCE APPLICATIONS ===');
 
   try {
     // Check if already seeded or force reset

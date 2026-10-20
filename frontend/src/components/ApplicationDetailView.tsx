@@ -197,7 +197,7 @@ export const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
 
   const handleExportSummary = () => {
     if (!app) return;
-    const summaryText = `SAMMOHANA BIHAR - APPLICATION SUMMARY REPORT
+    const summaryText = `SAMMOHAN BIHAR - APPLICATION SUMMARY REPORT
 ==================================================
 Application ID: ${app.applicationId}
 Status: ${app.status}
@@ -223,14 +223,14 @@ Assigned Officer: ${app.assignedEmployee || 'Unassigned'}
 Internal Remarks: ${app.internalRemarks || 'None'}
 
 Report Generated: ${new Date().toLocaleString()}
-Portal: Sammohana Bihar (Announcement & Project Tracking Portal)
+Portal: Sammohan Bihar (Announcement & Project Tracking Portal)
 ==================================================`;
 
     const blob = new Blob([summaryText], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Sammohana_Bihar_${app.applicationId}_Summary.txt`;
+    link.download = `Sammohan_Bihar_${app.applicationId}_Summary.txt`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -389,7 +389,7 @@ Portal: Sammohana Bihar (Announcement & Project Tracking Portal)
             </button>
             <div className="h-4 w-px bg-gray-300 hidden sm:block" />
             <nav className="hidden sm:flex items-center gap-2 text-xs text-gray-500 font-medium">
-              <span className="hover:text-gray-800 cursor-pointer" onClick={onBack}>Sammohana Bihar</span>
+              <span className="hover:text-gray-800 cursor-pointer" onClick={onBack}>Sammohan Bihar</span>
               <span>&rsaquo;</span>
               <span className="hover:text-gray-800 cursor-pointer" onClick={onBack}>
                 {language === 'hi' ? 'आवेदन' : 'Applications'}

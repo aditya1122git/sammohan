@@ -102,7 +102,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenSection, language }) => {
             &copy; {new Date().getFullYear()} {language === 'hi' ? 'बिहार सरकार। सर्वाधिकार सुरक्षित।' : 'Government of Bihar. All rights reserved.'}
           </div>
           <div className="text-[11px] text-blue-300 font-mono">
-            Sammohana Announcement & Project Tracking System v2.0
+            Sammohan Announcement & Project Tracking System v2.0
           </div>
         </div>
       </div>

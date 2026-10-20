@@ -179,13 +179,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-black text-white tracking-wide">JanSetu Bihar &bull; सम्मोहन</span>
+                <span className="text-base sm:text-lg font-black text-white tracking-wide">Sammohan &bull; सम्मोहन</span>
                 <span className="hidden md:inline-block bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
                   {language === 'hi' ? 'परियोजना अनुश्रवण' : 'Project Monitoring'}
                 </span>
               </div>
               <div className="text-[11px] sm:text-xs text-blue-200 font-medium">
-                JanSetu Bihar &bull; Announcement & Project Tracking Dashboard
+                Sammohan &bull; Announcement & Project Tracking Dashboard
               </div>
               <div className="text-[10px] text-amber-300/90 italic font-semibold sm:hidden">
                 &ldquo;घोषणा से क्रियान्वयन, पारदर्शिता के साथ प्रमाण।&rdquo;
@@ -283,7 +283,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
 
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-snug">
-                  सम्मोहन &bull; Sammohana
+                  सम्मोहन &bull; Sammohan
                 </h1>
                 <p className="text-xs sm:text-sm text-blue-200 mt-1 font-medium">
                   Announcement & Project Tracking Dashboard
@@ -315,7 +315,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
               {/* Security Bottom Note */}
               <div className="relative z-10 pt-5 mt-5 border-t border-white/10 text-[11px] text-blue-300">
-                <div>Government of Bihar &bull; Sammohana Portal</div>
+                <div>Government of Bihar &bull; Sammohan Portal</div>
                 <div className="text-[10px] text-blue-300/70 mt-0.5">&copy; {new Date().getFullYear()} Government of Bihar. All Rights Reserved</div>
               </div>
             </div>
@@ -337,7 +337,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
                     {mode === 'login'
-                      ? (language === 'hi' ? 'कृपया अपने अधिकृत क्रेडेंशियल्स और सुरक्षा कोड दर्ज करें।' : 'Enter your registered credentials and the CAPTCHA anti-bot verification code to access Sammohana Portal.')
+                      ? (language === 'hi' ? 'कृपया अपने अधिकृत क्रेडेंशियल्स और सुरक्षा कोड दर्ज करें।' : 'Enter your registered credentials and the CAPTCHA anti-bot verification code to access Sammohan Portal.')
                       : mode === 'forgot'
                       ? (language === 'hi' ? 'पासवर्ड रीसेट टोकन प्राप्त करने के लिए अपना आधिकारिक ईमेल दर्ज करें।' : 'Enter your registered official email to generate a password reset authorization token.')
                       : (language === 'hi' ? 'जारी किए गए रीसेट टोकन के साथ अपना नया पासवर्ड दर्ज करें।' : 'Enter your reset token alongside your new confidential password.')}
@@ -469,7 +469,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           <span>{language === 'hi' ? 'प्रमाणीकरण हो रहा है...' : 'Authenticating Credentials...'}</span>
                         </>
                       ) : (
-                        <span>{language === 'hi' ? 'पोर्टल में प्रवेश करें' : 'Sign In to Sammohana Portal'}</span>
+                        <span>{language === 'hi' ? 'पोर्टल में प्रवेश करें' : 'Sign In to Sammohan Portal'}</span>
                       )}
                     </button>
                   </form>

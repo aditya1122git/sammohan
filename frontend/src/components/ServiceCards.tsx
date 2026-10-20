@@ -17,8 +17,8 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ onOpenSection, langu
           </h2>
           <p className="text-gray-600 text-sm sm:text-base mt-1.5 max-w-2xl mx-auto font-medium">
             {language === 'hi'
-              ? 'JanSetu Bihar के तीन मुख्य स्तंभ — पारदर्शी, जवाबदेह और सुव्यवस्थित सेवा प्रवाह'
-              : 'Three core pillars of JanSetu Bihar — Transparent, accountable, and structured operational workflows.'}
+              ? 'सम्मोहन के तीन मुख्य स्तंभ — पारदर्शी, जवाबदेह और सुव्यवस्थित सेवा प्रवाह'
+              : 'Three core pillars of Sammohan — Transparent, accountable, and structured operational workflows.'}
           </p>
         </div>
 

@@ -93,7 +93,7 @@ def test_spa_root():
     req = urllib.request.urlopen(f'{BASE_URL}/', timeout=5)
     html = req.read().decode('utf-8')
     assert req.status == 200
-    assert '<div id="root">' in html or 'JanSetu' in html or '<title>' in html
+    assert '<div id="root">' in html or 'Sammohan' in html or '<title>' in html
 test("Single Page Application (SPA) Root Routing", test_spa_root)
 
 # 9. Path Traversal Protection

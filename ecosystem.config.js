@@ -1,8 +1,8 @@
-// PM2 Process Manager Configuration for JanSetu Bihar Portal
+// PM2 Process Manager Configuration for Sammohan Portal
 module.exports = {
   apps: [
     {
-      name: 'jansetu-bihar-portal',
+      name: 'sammohan-portal',
       script: './backend/dist/index.js',
       cwd: './',
       instances: 'max',

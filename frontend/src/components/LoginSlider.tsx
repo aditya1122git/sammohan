@@ -26,9 +26,9 @@ const slides: LoginSlideItem[] = [
     },
     subtitle: {
       hi: 'सम्मोहन पोर्टल — घोषणा से क्रियान्वयन, पारदर्शिता के साथ प्रमाण। 38 जिलों में विकास कार्यों का अनुश्रवण।',
-      en: 'Sammohana Bihar — Transparent & Responsive Governance dedicated to announcement and project monitoring.'
+      en: 'Sammohan Bihar — Transparent & Responsive Governance dedicated to announcement and project monitoring.'
     },
-    alt: 'CM Samrat Choudhary - Sammohana Bihar Portal',
+    alt: 'CM Samrat Choudhary - Sammohan Bihar Portal',
     imagePosition: 'object-center'
   },
   {
@@ -44,9 +44,9 @@ const slides: LoginSlideItem[] = [
     },
     subtitle: {
       hi: 'प्रत्येक घोषणा एवं परियोजना की त्रिस्तरीय निगरानी, वित्तीय स्थिति एवं माइलस्टोन सत्यापन।',
-      en: 'Sammohana Bihar — Project Tracking: End-to-end multi-tier monitoring from commitment to verified delivery.'
+      en: 'Sammohan Bihar — Project Tracking: End-to-end multi-tier monitoring from commitment to verified delivery.'
     },
-    alt: 'Sammohana Bihar Project Tracking Banner',
+    alt: 'Sammohan Bihar Project Tracking Banner',
     imagePosition: 'object-center'
   },
   {
@@ -82,7 +82,7 @@ const slides: LoginSlideItem[] = [
       hi: 'बिहार के समग्र विकास, पारदर्शी समीक्षा एवं जनकल्याणकारी योजनाओं का तीव्र क्रियान्वयन।',
       en: 'Accelerating Bihar’s holistic growth with transparent reviews and rapid execution of public welfare initiatives.'
     },
-    alt: 'सम्राट की हुंकार, विकास को मिली रफ़्तार - Sammohana Bihar',
+    alt: 'सम्राट की हुंकार, विकास को मिली रफ़्तार - Sammohan Bihar',
     imagePosition: 'object-center'
   },
   {
@@ -100,7 +100,7 @@ const slides: LoginSlideItem[] = [
       hi: 'घोषणा से क्रियान्वयन — पारदर्शी सुशासन, समयबद्ध माइलस्टोन एवं विकसित बिहार।',
       en: 'Responsive governance dedicated to transparent, verified, and milestone-tracked project delivery.'
     },
-    alt: 'सम्राट का संकल्प, बिहार का विकल्प - Sammohana Bihar',
+    alt: 'सम्राट का संकल्प, बिहार का विकल्प - Sammohan Bihar',
     imagePosition: 'object-center'
   }
 ];
@@ -175,7 +175,7 @@ export const LoginSlider: React.FC<LoginSliderProps> = ({ language }) => {
       ref={sliderRef}
       role="region"
       aria-roledescription="carousel"
-      aria-label="Sammohana Bihar Announcement & Project Tracking Banner"
+      aria-label="Sammohan Bihar Announcement & Project Tracking Banner"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsPaused(true)}

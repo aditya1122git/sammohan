@@ -1727,7 +1727,7 @@ export const UpGovLanding: React.FC<UpGovLandingProps> = ({
                 </div>
                 <div>
                   <div className="text-sm sm:text-base font-extrabold tracking-wide">
-                    {language === 'hi' ? 'सम्मोहन पोर्टल — पारदर्शी जनकल्याण एवं त्वरित क्रियान्वयन' : 'Sammohana Portal — Transparent Public Commitments & Timely Execution'}
+                    {language === 'hi' ? 'सम्मोहन पोर्टल — पारदर्शी जनकल्याण एवं त्वरित क्रियान्वयन' : 'Sammohan Portal — Transparent Public Commitments & Timely Execution'}
                   </div>
                   <div className="text-xs text-emerald-100 mt-0.5">
                     {language === 'hi'
@@ -2067,7 +2067,7 @@ export const UpGovLanding: React.FC<UpGovLandingProps> = ({
                 <p className="text-[11px] text-gray-600 leading-relaxed">
                   {language === 'hi'
                     ? 'सम्मोहन घोषणा एवं परियोजना अनुश्रवण प्रणाली v2.0 — पारदर्शी सुशासन, समयबद्ध माइलस्टोन एवं 38 जिलों में प्रगति।'
-                    : 'Sammohana Announcement & Project Tracking System v2.0 — End-to-end multi-tier monitoring across 38 districts.'}
+                    : 'Sammohan Announcement & Project Tracking System v2.0 — End-to-end multi-tier monitoring across 38 districts.'}
                 </p>
               </div>
 

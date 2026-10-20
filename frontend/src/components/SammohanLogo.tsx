@@ -1,13 +1,13 @@
 import React from 'react';
 
-interface JanSetuLogoProps {
+interface SammohanLogoProps {
   className?: string;
   variant?: 'light' | 'dark'; // 'light' for white backgrounds, 'dark' for navy backgrounds
   showTagline?: boolean;
   language?: 'hi' | 'en';
 }
 
-export const JanSetuLogo: React.FC<JanSetuLogoProps> = ({
+export const SammohanLogo: React.FC<SammohanLogoProps> = ({
   className = '',
   variant = 'light',
   showTagline = false,
@@ -17,7 +17,7 @@ export const JanSetuLogo: React.FC<JanSetuLogoProps> = ({
 
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
-      {/* Original Geometric Bridge/Connector Emblem ("JanSetu" - Bridge of the People) */}
+      {/* Sammohan geometric governance emblem */}
       <div className="relative flex-shrink-0">
         <svg
           viewBox="0 0 48 48"
@@ -75,7 +75,7 @@ export const JanSetuLogo: React.FC<JanSetuLogoProps> = ({
               isDark ? 'text-white' : 'text-[#1C4D8D]'
             }`}
           >
-            JanSetu
+            Sammohan
           </span>
           <span
             className="text-xl sm:text-2xl font-black tracking-tight text-[#C35504]"

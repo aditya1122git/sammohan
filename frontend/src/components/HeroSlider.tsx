@@ -10,7 +10,7 @@ const slides = [
   {
     id: 2,
     image: '/assets/Web_Images/Slide1.webp',
-    alt: 'सम्राट का विज़न, नए बिहार का मिशन — JanSetu Bihar'
+    alt: 'सम्राट का विज़न, नए बिहार का मिशन — Sammohan'
   },
   {
     id: 3,
@@ -20,7 +20,7 @@ const slides = [
   {
     id: 4,
     image: '/assets/Web_Images/Slide4.webp',
-    alt: 'सम्राट का संकल्प, बिहार का विकल्प — JanSetu Bihar'
+    alt: 'सम्राट का संकल्प, बिहार का विकल्प — Sammohan'
   }
 ];
 
