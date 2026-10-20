@@ -131,8 +131,8 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-white rounded-2xl max-w-6xl w-full shadow-2xl overflow-hidden border border-gray-100 animate-scaleUp my-4 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+      <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-amber-700 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">

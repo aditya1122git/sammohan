@@ -14,6 +14,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { ProjectAnnouncement, District } from '../types';
+import { BIHAR_48_DEPARTMENTS } from '../data/biharDepartments';
 
 interface ProjectFormModalProps {
   isOpen: boolean;
@@ -134,30 +135,20 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
     }
   };
 
-  const departmentsList = [
-    'Road Construction (पथ निर्माण विभाग)',
-    'Water Resources (जल संसाधन विभाग)',
-    'Health (स्वास्थ्य विभाग)',
-    'Education (शिक्षा विभाग)',
-    'Energy (ऊर्जा विभाग)',
-    'Urban Development & Housing (नगर विकास एवं आवास विभाग)',
-    'Industries (उद्योग विभाग)',
-    'Panchayati Raj (पंचायती राज विभाग)',
-    'Tourism (पर्यटन विभाग)',
-    'Information Technology (सूचना प्रावैधिकी विभाग)',
-    'Labour Resources (श्रम संसाधन विभाग)',
-    'Minor Water Resources (लघु जल संसाधन विभाग)',
-    'Civil Aviation & Cabinet (नागरिक विमानन एवं मंत्रिमंडल सचिवालय)',
-    'Rural Works Department (ग्रामीण कार्य विभाग)'
-  ];
+  const departmentsList = BIHAR_48_DEPARTMENTS.map((department) => {
+    const englishName = department.nameEn.replace(/ Department$/, '');
+    return {
+      id: department.id,
+      value: `${englishName} (${department.nameHi})`,
+      label: language === 'hi'
+        ? `${department.nameHi} (${englishName})`
+        : `${englishName} (${department.nameHi})`
+    };
+  });
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onClick={onClose} />
-
-      {/* Modal Card */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden z-10 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+      <div className="relative bg-white w-full h-full overflow-hidden flex flex-col">
         
         {/* Header */}
         <div className="bg-[#18327b] text-white p-5 flex items-center justify-between border-b border-blue-900">
@@ -219,8 +210,8 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white font-medium"
               >
-                {departmentsList.map((d, i) => (
-                  <option key={i} value={d}>{d}</option>
+                {departmentsList.map((department) => (
+                  <option key={department.id} value={department.value}>{department.label}</option>
                 ))}
               </select>
             </div>

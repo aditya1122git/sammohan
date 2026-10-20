@@ -5,7 +5,6 @@ import {
   PieChart,
   Calendar,
   Download,
-  RefreshCw,
   TrendingUp,
   MapPin,
   Clock,
@@ -73,8 +72,8 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-white rounded-2xl max-w-7xl w-full shadow-2xl overflow-hidden border border-gray-100 animate-scaleUp my-4 max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+      <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
@@ -93,13 +92,6 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={loadAllReports}
-              className="p-1.5 hover:bg-white/20 rounded-full transition"
-              title="Refresh Stats"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
             <button onClick={onClose} className="p-1.5 hover:bg-white/20 rounded-full transition">
               <X className="w-5 h-5" />
             </button>

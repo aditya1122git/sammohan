@@ -239,12 +239,8 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-2 sm:p-4">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onClick={onClose} />
-
-      {/* Modal Container */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[94vh] flex flex-col z-10 overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+      <div className="relative bg-white w-full h-full flex flex-col overflow-hidden">
         
         {/* Modal Top Header */}
         <div className="bg-[#18327b] text-white p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-blue-900">

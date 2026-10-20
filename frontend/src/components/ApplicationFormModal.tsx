@@ -290,8 +290,8 @@ export const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-      <div className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden border border-gray-100 animate-scaleUp my-6 max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+      <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
