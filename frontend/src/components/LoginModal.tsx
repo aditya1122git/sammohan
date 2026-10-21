@@ -230,7 +230,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   </div>
                   <div className="flex items-center gap-2 text-[11px] text-blue-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    <span>11-Field Comprehensive Audit Trail</span>
+                    <span>11-Field Application Management</span>
                   </div>
                   <div className="flex items-center gap-2 text-[11px] text-blue-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>

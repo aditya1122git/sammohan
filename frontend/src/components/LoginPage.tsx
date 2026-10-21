@@ -307,7 +307,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-blue-200">
                       <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                      <span>Multi-Tier Role Access & Audit Trails</span>
+                      <span>Multi-Tier Role-Based Access</span>
                     </div>
                   </div>
                 </div>

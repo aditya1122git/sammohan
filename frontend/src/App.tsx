@@ -15,7 +15,6 @@ import { BiharGovHeader } from './components/BiharGovHeader';
 import { ApplicationFormModal } from './components/ApplicationFormModal';
 import { ApplicationTableModal } from './components/ApplicationTableModal';
 import { AnalyticsModal } from './components/AnalyticsModal';
-import { MasterDataModal } from './components/MasterDataModal';
 import { AdminDashboardModal } from './components/AdminDashboardModal';
 import { LoginModal } from './components/LoginModal';
 import { ApplicationDetailDrawer } from './components/ApplicationDetailDrawer';
@@ -32,7 +31,6 @@ import {
   FilePlus2,
   TableProperties,
   BarChart3,
-  Layers3,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -69,7 +67,7 @@ export const App: React.FC = () => {
 
   // Active Modals in Workspace
   const [activeModal, setActiveModal] = useState<
-    'form' | 'table' | 'reports' | 'master' | 'admin' | null
+    'form' | 'table' | 'reports' | 'admin' | null
   >(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
@@ -286,7 +284,7 @@ export const App: React.FC = () => {
   };
 
   const handleOpenSection = (
-    section: 'form' | 'table' | 'reports' | 'master' | 'admin'
+    section: 'form' | 'table' | 'reports' | 'admin'
   ) => {
     setRbacNotice(null);
 
@@ -725,10 +723,6 @@ export const App: React.FC = () => {
           <div>
             <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center justify-between">
               <span>{language === 'hi' ? 'लाइव परियोजना सांख्यिकी' : 'Live Project Tracking Statistics'}</span>
-              <span className="text-emerald-700 font-mono text-[11px] font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Real-time Synced (MongoDB)</span>
-              </span>
             </div>
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
               
@@ -854,7 +848,7 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             
             <div
               onClick={() => {
@@ -928,29 +922,6 @@ export const App: React.FC = () => {
               </div>
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
                 <span>{language === 'hi' ? 'एनालिटिक्स देखें' : 'View Analytics'}</span>
-                <span>&rarr;</span>
-              </div>
-            </div>
-
-            <div
-              onClick={() => handleOpenSection('master')}
-              className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  <Layers3 className="w-6 h-6" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900">
-                  {language === 'hi' ? '38 जिला एवं विभागीय मास्टर डेटा' : 'Bihar Master Data Desk'}
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  {language === 'hi'
-                    ? '38 जिलों, 243 विधानसभा क्षेत्रों, 48 विभागों एवं प्रशासनिक नोडल पदाधिकारियों की आधिकारिक सूची।'
-                    : 'Official catalog of 38 districts, 243 assembly constituencies, 48 departments, and administrative nodal contacts.'}
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
-                <span>{language === 'hi' ? 'मास्टर डेटा देखें' : 'View Master Data'}</span>
                 <span>&rarr;</span>
               </div>
             </div>
@@ -1144,20 +1115,13 @@ export const App: React.FC = () => {
         language={language}
       />
 
-      <MasterDataModal
-        isOpen={activeModal === 'master'}
-        onClose={() => setActiveModal(null)}
-        currentUser={currentUser}
-        language={language}
-      />
-
       <AdminDashboardModal
         isOpen={activeModal === 'admin' && currentUser?.role === 'ADMIN'}
         onClose={() => setActiveModal(null)}
         currentUser={currentUser}
         language={language}
-        onSettingsUpdated={(updatedSettings) => {
-          setSettings(updatedSettings);
+        onCurrentUserUpdated={(updatedUser) => {
+          setCurrentUser(updatedUser);
         }}
       />
 

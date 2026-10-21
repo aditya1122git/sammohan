@@ -38,15 +38,6 @@ router.post('/', authenticateToken, requireAdmin, async (req: AuthenticatedReque
       }
     });
 
-    await db.auditLog.create({
-      data: {
-        entityType: 'MASTER_DATA',
-        action: 'CREATE',
-        details: `Created new complaint category: ${created.name} (${created.code})`,
-        performedBy: req.user?.email || 'admin',
-        ipAddress: req.ip
-      }
-    });
 
     res.status(201).json({ category: created });
   } catch (error: any) {

@@ -325,19 +325,6 @@ router.post('/clear-all', authenticateToken, requireDataEntryOrAdmin, async (req
     const deletedCount = await db.projectAnnouncement.deleteMany({});
     console.log(`[PROJECTS] Purged all ${deletedCount.count} project records.`);
     
-    // Create Audit Log
-    if (req.user) {
-      await db.auditLog.create({
-        data: {
-          entityType: 'PROJECT_ANNOUNCEMENT',
-          action: 'CLEAR_ALL',
-          details: `Cleared all project announcement records (${deletedCount.count} records purged for manual database entry).`,
-          performedBy: req.user.email,
-          ipAddress: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1'
-        }
-      });
-    }
-
     res.json({
       success: true,
       count: deletedCount.count,

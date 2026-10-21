@@ -239,7 +239,7 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
       <div className="relative bg-white w-full h-full flex flex-col overflow-hidden">
         
         {/* Modal Top Header */}

@@ -232,33 +232,12 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
     }
   };
 
-  const handleRestoreReferenceData = async () => {
-    if (!window.confirm(
-      language === 'hi'
-        ? 'क्या आप 110 संदर्भ आवेदन रिकॉर्ड (संलग्न दस्तावेजों व सक्रिय फॉलो-अप सहित) लोड करना चाहते हैं?'
-        : 'Do you want to load 110 reference applications with supporting document attachments and active follow-ups?'
-    )) {
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await api.restoreReferenceData();
-      await fetchApplications();
-      if (onDataChanged) onDataChanged();
-      alert(language === 'hi' ? '110 संदर्भ आवेदन रिकॉर्ड सफलतापूर्वक लोड हो गए।' : res.message);
-    } catch (e: any) {
-      alert('Error loading reference data: ' + (e.response?.data?.message || e.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const canEdit = currentUser && currentUser.role !== 'READONLY';
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-3.5 flex items-center justify-between flex-shrink-0">
@@ -279,15 +258,6 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
           </div>
           <div className="flex items-center gap-2">
             {canEdit && (
-              <>
-                <button
-                  onClick={handleRestoreReferenceData}
-                  className="bg-emerald-600/90 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
-                  title="Load 110 reference records with supporting documents"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>{language === 'hi' ? '110 संदर्भ डेटा लोड करें' : 'Load 110 Records'}</span>
-                </button>
                 <button
                   onClick={handleClearAllData}
                   className="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
@@ -296,7 +266,6 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>{language === 'hi' ? 'सभी डेटा हटाएं' : 'Clear All Data'}</span>
                 </button>
-              </>
             )}
             <button
               onClick={handleExportCsv}
@@ -502,19 +471,10 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
                 </p>
                 <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto">
                   {language === 'hi'
-                    ? 'सभी पूर्व डेटा हटा दिए गए हैं। आप "नया आवेदन दर्ज करें" से अपना व्यक्तिगत डेटा सुरक्षित रूप से दर्ज कर सकते हैं या परीक्षण हेतु संदर्भ डेटा लोड कर सकते हैं।'
-                    : 'All auto-generated or detected demo records have been cleared. You can add your personal application records safely, or load the 110 reference records to test viewing and downloading.'}
+                    ? 'आप "नया आवेदन दर्ज करें" से नया आवेदन रिकॉर्ड दर्ज कर सकते हैं।'
+                    : 'You can add a new application record from New Application Entry.'}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
-                  {canEdit && (
-                    <button
-                      onClick={handleRestoreReferenceData}
-                      className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>{language === 'hi' ? '110 संदर्भ डेटा व दस्तावेज लोड करें' : 'Load 110 Reference Records & Documents'}</span>
-                    </button>
-                  )}
                   <button
                     onClick={handleExportCsv}
                     className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-xl text-xs transition border border-gray-200"
@@ -722,7 +682,7 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
 
                 <div>
                   <label className="block font-bold text-gray-700 mb-1">
-                    Priority (Maintains Audit Trail)
+                    Priority
                   </label>
                   <select
                     value={editPriority}
@@ -772,7 +732,7 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
                     value={editRemarks}
                     onChange={(e) => setEditRemarks(e.target.value)}
                     className="w-full border rounded-lg p-2"
-                    placeholder="Enter reason for changes (recorded in audit logs)..."
+                    placeholder="Enter reason for changes..."
                   />
                 </div>
               </div>

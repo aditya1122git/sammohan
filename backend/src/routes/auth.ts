@@ -144,15 +144,6 @@ router.post('/login', async (req, res) => {
       }
       failedLoginAttempts.set(clientKey, current);
 
-      await db.auditLog.create({
-        data: {
-          entityType: 'USER',
-          action: 'LOGIN_FAILED',
-          details: `Failed authentication attempt for '${identifier}'. Reason: User not found or inactive. Attempt: ${current.count}`,
-          performedBy: identifier,
-          ipAddress: req.ip
-        }
-      }).catch(() => {});
 
       return res.status(401).json({ error: 'Invalid User ID or password. Please check your credentials.' });
     }
@@ -168,15 +159,6 @@ router.post('/login', async (req, res) => {
       }
       failedLoginAttempts.set(clientKey, current);
 
-      await db.auditLog.create({
-        data: {
-          entityType: 'USER',
-          action: 'LOGIN_FAILED',
-          details: `Failed authentication attempt for '${identifier}'. Reason: Invalid password. Attempt: ${current.count}`,
-          performedBy: identifier,
-          ipAddress: req.ip
-        }
-      }).catch(() => {});
 
       return res.status(401).json({ error: 'Invalid User ID or password. Please check your credentials.' });
     }
@@ -196,16 +178,6 @@ router.post('/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // Audit log
-    await db.auditLog.create({
-      data: {
-        entityType: 'USER',
-        action: 'LOGIN',
-        details: `User ${user.email} (${user.role}) authenticated successfully.`,
-        performedBy: user.email,
-        ipAddress: req.ip
-      }
-    });
 
     res.json({
       token,
@@ -236,22 +208,6 @@ router.post('/logout', async (req, res) => {
     if (token) {
       revokeToken(token);
 
-      try {
-        const decoded = jwt.decode(token) as any;
-        if (decoded && decoded.email) {
-          await db.auditLog.create({
-            data: {
-              entityType: 'USER',
-              action: 'LOGOUT',
-              details: `User ${decoded.email} (${decoded.role}) logged out. Server session invalidated.`,
-              performedBy: decoded.email,
-              ipAddress: req.ip
-            }
-          });
-        }
-      } catch (e) {
-        // Ignore token decoding failure during logout
-      }
     }
 
     res.json({
@@ -294,15 +250,6 @@ router.post('/forgot-password', async (req, res) => {
       }
     });
 
-    await db.auditLog.create({
-      data: {
-        entityType: 'USER',
-        action: 'PASSWORD_RESET_REQUEST',
-        details: `Password reset requested for ${user.email}`,
-        performedBy: user.email,
-        ipAddress: req.ip
-      }
-    });
 
     res.json({
       success: true,
@@ -347,15 +294,6 @@ router.post('/reset-password', async (req, res) => {
       where: { id: resetRecord.id }
     });
 
-    await db.auditLog.create({
-      data: {
-        entityType: 'USER',
-        action: 'PASSWORD_RESET_COMPLETE',
-        details: `Password successfully updated for ${resetRecord.email}`,
-        performedBy: resetRecord.email,
-        ipAddress: req.ip
-      }
-    });
 
     res.json({
       success: true,
@@ -397,16 +335,6 @@ router.post('/demo-switch', async (req, res) => {
     failedLoginAttempts.delete(`${req.ip}_${user.email.toLowerCase()}`);
     failedLoginAttempts.delete(`${req.ip}_${user.email.split('@')[0].toLowerCase()}`);
 
-    // Audit log
-    await db.auditLog.create({
-      data: {
-        entityType: 'USER',
-        action: 'LOGIN',
-        details: `Role switch authentication for ${user.email} (${user.role})`,
-        performedBy: user.email,
-        ipAddress: req.ip
-      }
-    }).catch(() => {});
 
     res.json({
       token,
@@ -435,6 +363,101 @@ router.get('/me', authenticateToken, async (req: AuthenticatedRequest, res: Resp
     res.json({ user });
   } catch (error: any) {
     res.status(500).json({ error: 'Error fetching profile' });
+  }
+});
+
+// PATCH /api/auth/me - Update the signed-in user's profile
+router.patch('/me', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const name = String(req.body.name || '').trim();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const department = String(req.body.department || '').trim();
+    const phone = String(req.body.phone || '').trim();
+
+    if (name.length < 2) {
+      return res.status(400).json({ error: 'Name must contain at least 2 characters.' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+
+    const emailOwner = await db.user.findUnique({ where: { email } });
+    if (emailOwner && emailOwner.id !== req.user.id) {
+      return res.status(409).json({ error: 'This email address is already assigned to another user.' });
+    }
+
+    const user = await db.user.update({
+      where: { id: req.user.id },
+      data: {
+        name,
+        email,
+        department: department || null,
+        phone: phone || null
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        department: true,
+        phone: true,
+        isActive: true,
+        createdAt: true
+      }
+    });
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({ user, token, message: 'Profile updated successfully.' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+// POST /api/auth/change-password - Change password after verifying the current password
+router.post('/change-password', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required.' });
+    }
+    if (String(newPassword).length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters long.' });
+    }
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ error: 'New password must be different from the current password.' });
+    }
+
+    const user = await db.user.findUnique({ where: { id: req.user.id } });
+    if (!user || !user.isActive) {
+      return res.status(404).json({ error: 'Active user account not found.' });
+    }
+
+    const currentPasswordMatches = await bcrypt.compare(currentPassword, user.password);
+    if (!currentPasswordMatches) {
+      return res.status(400).json({ error: 'Current password is incorrect.' });
+    }
+
+    const password = await bcrypt.hash(newPassword, 12);
+    await db.user.update({ where: { id: user.id }, data: { password } });
+
+    res.json({ success: true, message: 'Password changed successfully.' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to change password.' });
   }
 });
 
@@ -477,32 +500,10 @@ router.post('/users', authenticateToken, requireAdmin, async (req: Authenticated
       select: { id: true, name: true, email: true, role: true, department: true, phone: true, isActive: true }
     });
 
-    await db.auditLog.create({
-      data: {
-        entityType: 'USER',
-        action: 'CREATE',
-        details: `Created new user ${created.email} with role ${created.role}`,
-        performedBy: req.user?.email || 'admin',
-        ipAddress: req.ip
-      }
-    });
 
     res.status(201).json({ user: created });
   } catch (error: any) {
     res.status(500).json({ error: 'Error creating user' });
-  }
-});
-
-// GET /api/auth/audit-logs (Admin only)
-router.get('/audit-logs', authenticateToken, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const logs = await db.auditLog.findMany({
-      take: 100,
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json({ logs });
-  } catch (error: any) {
-    res.status(500).json({ error: 'Error fetching audit logs' });
   }
 });
 

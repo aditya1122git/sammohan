@@ -12,19 +12,15 @@ async function clearDemoData() {
     const followUpsDeleted = await db.followUp.deleteMany({});
     console.log(`✓ Deleted ${followUpsDeleted.count} demo/test follow-up actions.`);
 
-    // 2. Delete all AuditLog records
-    const auditLogsDeleted = await db.auditLog.deleteMany({});
-    console.log(`✓ Deleted ${auditLogsDeleted.count} demo/test audit log entries.`);
-
-    // 3. Delete all Application records
+    // 2. Delete all Application records
     const appsDeleted = await db.application.deleteMany({});
     console.log(`✓ Deleted ${appsDeleted.count} demo/test application records.`);
 
-    // 4. Delete all ProjectAnnouncement records (clearing auto-detected projects)
+    // 3. Delete all ProjectAnnouncement records (clearing auto-detected projects)
     const projectsDeleted = await db.projectAnnouncement.deleteMany({});
     console.log(`✓ Deleted ${projectsDeleted.count} auto-generated/detected project announcements.`);
 
-    // 5. Delete any pending PasswordResetTokens
+    // 4. Delete any pending PasswordResetTokens
     const tokensDeleted = await db.passwordResetToken.deleteMany({});
     console.log(`✓ Deleted ${tokensDeleted.count} temporary password reset tokens.`);
 

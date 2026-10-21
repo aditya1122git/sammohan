@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
   X,
   BarChart3,
   PieChart,
@@ -15,6 +29,19 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { DashboardStats, DistrictStat, CategoryStat } from '../types';
+
+ChartJS.register(
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip
+);
 
 interface AnalyticsModalProps {
   isOpen: boolean;
@@ -33,7 +60,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
   const [ageingReport, setAgeingReport] = useState<any>(null);
   const [workloadReport, setWorkloadReport] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeReportTab, setActiveReportTab] = useState<'districts' | 'categories' | 'ageing' | 'workload'>('districts');
+  const [activeReportTab, setActiveReportTab] = useState<'overview' | 'districts' | 'categories' | 'ageing' | 'workload'>('overview');
   const [districtSearch, setDistrictSearch] = useState('');
 
   useEffect(() => {
@@ -69,17 +96,90 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
     d.districtCode.toLowerCase().includes(districtSearch.toLowerCase())
   );
 
+  const statusChartData = {
+    labels: ['Pending', 'In Progress', 'Awaiting Info', 'Completed', 'Overdue'],
+    datasets: [{
+      data: [stats?.pending || 0, stats?.inProgress || 0, stats?.awaitingInfo || 0, stats?.completed || 0, stats?.overdue || 0],
+      backgroundColor: ['#f59e0b', '#4f46e5', '#9333ea', '#059669', '#e11d48'],
+      borderColor: '#ffffff',
+      borderWidth: 3,
+      hoverOffset: 8
+    }]
+  };
+
+  const topDistricts = [...districtStats]
+    .sort((a, b) => b.totalApplications - a.totalApplications)
+    .slice(0, 10);
+  const districtChartData = {
+    labels: topDistricts.map((district) => district.districtName),
+    datasets: [
+      { label: 'Total', data: topDistricts.map((district) => district.totalApplications), backgroundColor: '#1C4D8D', borderRadius: 6 },
+      { label: 'Completed', data: topDistricts.map((district) => district.completedCount), backgroundColor: '#10b981', borderRadius: 6 },
+      { label: 'Pending', data: topDistricts.map((district) => district.pendingCount), backgroundColor: '#f59e0b', borderRadius: 6 }
+    ]
+  };
+
+  const topCategories = [...categoryStats]
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
+  const categoryChartData = {
+    labels: topCategories.map((category) => category.categoryName),
+    datasets: [{
+      label: 'Applications',
+      data: topCategories.map((category) => category.total),
+      backgroundColor: ['#1C4D8D', '#C35504', '#0891b2', '#7c3aed', '#059669', '#dc2626', '#ca8a04', '#475569'],
+      borderRadius: 7
+    }]
+  };
+
+  const ageingBrackets = ageingReport?.brackets || [];
+  const ageingChartData = {
+    labels: ageingBrackets.map((bracket: any) => bracket.label),
+    datasets: [{
+      label: 'Pending cases',
+      data: ageingBrackets.map((bracket: any) => bracket.count),
+      borderColor: '#C35504',
+      backgroundColor: 'rgba(195, 85, 4, 0.16)',
+      pointBackgroundColor: '#1C4D8D',
+      pointRadius: 5,
+      tension: 0.35,
+      fill: true
+    }]
+  };
+
+  const commonChartOptions: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 18, font: { family: 'Poppins', size: 11 } } },
+      tooltip: { backgroundColor: '#0f172a', padding: 12, titleFont: { family: 'Poppins' }, bodyFont: { family: 'Poppins' } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 10 }, maxRotation: 35 } },
+      y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.18)' }, ticks: { precision: 0, font: { family: 'Poppins', size: 10 } } }
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-[#C35504] flex items-center justify-center font-bold text-sm shadow">
-              04
-            </span>
+            <button
+              onClick={() => setActiveReportTab('overview')}
+              className={`pb-2 px-3 font-bold border-b-2 transition flex items-center gap-1.5 ${
+                activeReportTab === 'overview'
+                  ? 'border-[#C35504] text-[#C35504]'
+                  : 'border-transparent text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              <PieChart className="w-3.5 h-3.5" />
+              <span>Visual Overview</span>
+            </button>
+
             <div>
               <h3 className="text-lg font-bold">
                 {language === 'hi' ? 'रिपोर्ट्स एवं डेटाबेस एनालिटिक्स' : 'Reports and Analytics Dashboard'}
@@ -220,6 +320,58 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
 
         {/* Tab Content */}
         <div className="p-6 overflow-y-auto flex-grow text-xs">
+          {/* TAB 1: Chart.js Visual Overview */}
+          {activeReportTab === 'overview' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-bold text-slate-900">Application Status Mix</h4>
+                    <p className="text-[11px] text-slate-500 mt-1">Live distribution across workflow stages</p>
+                  </div>
+                  <div className="h-64">
+                    <Doughnut data={statusChartData} options={{ ...commonChartOptions, cutout: '68%', scales: undefined }} />
+                  </div>
+                </section>
+
+                <section className="xl:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="mb-4 flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">Top District Performance</h4>
+                      <p className="text-[11px] text-slate-500 mt-1">Total, completed and pending applications in the busiest districts</p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-blue-50 text-[#1C4D8D] font-bold">Top 10</span>
+                  </div>
+                  <div className="h-64">
+                    <Bar data={districtChartData} options={commonChartOptions} />
+                  </div>
+                </section>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-bold text-slate-900">Leading Complaint Categories</h4>
+                    <p className="text-[11px] text-slate-500 mt-1">Highest application volume by sector</p>
+                  </div>
+                  <div className="h-72">
+                    <Bar data={categoryChartData} options={{ ...commonChartOptions, indexAxis: 'y' }} />
+                  </div>
+                </section>
+
+                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-bold text-slate-900">Pending Ageing Trend</h4>
+                    <p className="text-[11px] text-slate-500 mt-1">Open cases grouped by elapsed resolution time</p>
+                  </div>
+                  <div className="h-72">
+                    <Line data={ageingChartData} options={commonChartOptions} />
+                  </div>
+                </section>
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: District-Wise */}
           {activeReportTab === 'districts' && (
             <div className="space-y-4">

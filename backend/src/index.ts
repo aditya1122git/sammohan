@@ -99,7 +99,7 @@ app.post('/api/upload', authenticateToken, requireDataEntryOrAdmin, async (req: 
   });
 });
 
-// Secure Document Download - Restricted to Authorized Users with Revocation Check & Audit Trail
+// Secure Document Download - Restricted to Authorized Users with Revocation Check
 app.get('/api/documents/:filename', async (req: any, res) => {
   const filename = req.params.filename;
   if (!filename) {
@@ -139,16 +139,6 @@ app.get('/api/documents/:filename', async (req: any, res) => {
 
   const ext = path.extname(safeFilename).toLowerCase();
 
-  // Audit log attachment access
-  await db.auditLog.create({
-    data: {
-      entityType: 'DOCUMENT',
-      action: 'DOWNLOAD',
-      details: `Attachment accessed: ${safeFilename}`,
-      performedBy: decodedUser?.email || 'user',
-      ipAddress: req.ip
-    }
-  }).catch(() => {});
 
   if (req.query.download === '1' || req.query.download === 'true') {
     return res.download(filePath, safeFilename);

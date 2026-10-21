@@ -147,7 +147,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
       <div className="relative bg-white w-full h-full overflow-hidden flex flex-col">
         
         {/* Header */}

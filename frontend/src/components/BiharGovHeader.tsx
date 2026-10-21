@@ -13,13 +13,13 @@ import {
   BarChart3,
   Menu,
   X,
-  MapPin,
   Building2,
   IndianRupee,
   Phone,
   Compass
 } from 'lucide-react';
 import { User } from '../types';
+import { getRoleLabel, getUserDisplayName } from '../utils/userDisplay';
 
 interface BiharGovHeaderProps {
   currentUser: User | null;
@@ -27,7 +27,7 @@ interface BiharGovHeaderProps {
   onToggleLanguage: (lang: 'hi' | 'en') => void;
   onOpenLogin: () => void;
   onLogout: () => void;
-  onOpenSection: (section: 'form' | 'table' | 'reports' | 'master' | 'admin') => void;
+  onOpenSection: (section: 'form' | 'table' | 'reports' | 'admin') => void;
   onGoHome: () => void;
   onSearch?: (query: string) => void;
   activeNav?: string;
@@ -71,15 +71,6 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
       onSearch(searchVal.trim());
     } else {
       onOpenSection('table');
-    }
-  };
-
-  const scrollToDistricts = () => {
-    const el = document.getElementById('district-highlights');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      onOpenSection('master');
     }
   };
 
@@ -199,7 +190,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
                 type="button"
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="w-9 h-9 rounded-full bg-[#18327b] hover:bg-[#12245b] text-white flex items-center justify-center transition shadow-xs cursor-pointer ring-2 ring-transparent hover:ring-blue-300"
-                title={`${currentUser.name} (${currentUser.role})`}
+                title={`${getUserDisplayName(currentUser.name)} — ${getRoleLabel(currentUser.role)}`}
               >
                 <UserIcon className="w-4 h-4 text-white" />
               </button>
@@ -219,11 +210,11 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
               <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 z-50 animate-fadeIn text-xs">
                 {/* User Info Header */}
                 <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 mb-2">
-                  <div className="font-bold text-slate-900 text-sm">{currentUser.name}</div>
+                  <div className="font-bold text-slate-900 text-sm">{getUserDisplayName(currentUser.name)}</div>
                   <div className="text-slate-500 text-[11px] font-mono mt-0.5">{currentUser.email}</div>
                   <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-100 text-[#18327b] font-black text-[10px] mt-2">
                     <ShieldCheck className="w-3 h-3 text-[#18327b]" />
-                    <span>{currentUser.role} PRIVILEGED ACCESS</span>
+                    <span>{getRoleLabel(currentUser.role)}</span>
                   </div>
                 </div>
 
@@ -346,7 +337,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
             {currentUser ? (
               <div className="flex items-center justify-between w-full">
-                <span className="text-xs font-bold text-slate-700">{currentUser.name} ({currentUser.role})</span>
+                <span className="text-xs font-bold text-slate-700">{getUserDisplayName(currentUser.name)} — {getRoleLabel(currentUser.role)}</span>
                 <button
                   onClick={() => { onLogout(); setMobileMenuOpen(false); }}
                   className="text-xs font-bold text-red-600 hover:underline"

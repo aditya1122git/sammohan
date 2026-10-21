@@ -71,17 +71,6 @@ export interface FollowUpRecord {
   };
 }
 
-export interface AuditLogRecord {
-  id: number;
-  applicationId?: number;
-  entityType: string;
-  action: string;
-  details: string;
-  performedBy: string;
-  ipAddress?: string;
-  createdAt: string;
-}
-
 export interface Application {
   id: number;
   applicationId: string;
@@ -118,7 +107,6 @@ export interface Application {
   createdAt: string;
   updatedAt: string;
   followUps?: FollowUpRecord[];
-  auditLogs?: AuditLogRecord[];
   // Calculated frontend properties
   daysSinceReceipt?: number;
   daysSinceLastUpdate?: number;

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Home, FileText, Database, BarChart3, ChevronRight, Shield, Phone, Printer } from 'lucide-react';
+import { Home, Database, BarChart3 } from 'lucide-react';
 
 interface FooterProps {
-  onOpenSection: (section: 'form' | 'table' | 'reports' | 'master') => void;
+  onOpenSection: (section: 'form' | 'table' | 'reports') => void;
   language: 'hi' | 'en';
 }
 
@@ -81,15 +81,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenSection, language }) => {
                 >
                   <BarChart3 className="w-3.5 h-3.5 text-blue-300 group-hover:text-amber-300" />
                   <span>{language === 'hi' ? 'वित्तीय एवं भौतिक रिपोर्ट (Reports & Analytics)' : 'Reports & Analytics'}</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onOpenSection('master')}
-                  className="hover:text-white hover:underline flex items-center gap-2 text-left transition group"
-                >
-                  <ChevronRight className="w-3.5 h-3.5 text-blue-300 group-hover:text-amber-300" />
-                  <span>{language === 'hi' ? 'बिहार मास्टर डेटा (38 जिले)' : 'Bihar Master Data (38 Districts)'}</span>
                 </button>
               </li>
             </ul>

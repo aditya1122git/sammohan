@@ -811,9 +811,6 @@ export const UpGovLanding: React.FC<UpGovLandingProps> = ({
           } else if (section === 'reports') {
             const el = document.getElementById('announcement-dashboard');
             if (el) el.scrollIntoView({ behavior: 'smooth' });
-          } else if (section === 'master') {
-            const el = document.getElementById('dignitaries');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
           } else if (section === 'form') {
             if (onOpenNewForm) onOpenNewForm();
           } else if (section === 'admin') {

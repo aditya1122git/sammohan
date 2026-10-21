@@ -222,10 +222,6 @@ export const SankalpLogin: React.FC<SankalpLoginProps> = ({
               <Shield className="w-4 h-4 text-amber-400" />
               <span>256-bit Secure TLS</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
-              <span>Active Audit Logging</span>
-            </div>
           </div>
           <div className="text-[11px] text-blue-300/80 font-medium">
             CMO Bihar Digital Governance Suite

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Home, Menu, X, ChevronDown, FileText, Database, BarChart3, Shield, MapPin, Sparkles, Layers } from 'lucide-react';
+import { Home, Menu, X, ChevronDown, FileText, Database, BarChart3, Shield, Layers } from 'lucide-react';
 import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  onOpenSection: (section: 'form' | 'table' | 'reports' | 'master' | 'admin') => void;
+  onOpenSection: (section: 'form' | 'table' | 'reports' | 'admin') => void;
   language: 'hi' | 'en';
   onGoHome?: () => void;
 }
@@ -97,14 +97,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>{language === 'hi' ? 'रिपोर्ट्स एवं एनालिटिक्स' : 'Reports & Analytics'}</span>
           </button>
 
-          <button
-            onClick={() => onOpenSection('master')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded hover:bg-[#12245b] transition"
-          >
-            <MapPin className="w-4 h-4 text-yellow-300" />
-            <span>{language === 'hi' ? 'बिहार मास्टर डेटा' : 'Bihar Master Data (38 Districts)'}</span>
-          </button>
-
           {currentUser && currentUser.role === 'ADMIN' && (
             <button
               onClick={() => onOpenSection('admin')}
@@ -161,17 +153,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <BarChart3 className="w-4 h-4" />
             <span>{language === 'hi' ? 'रिपोर्ट्स एवं एनालिटिक्स' : 'Reports & Analytics'}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              onOpenSection('master');
-              setIsOpen(false);
-            }}
-            className="w-full text-left py-2 px-3 rounded hover:bg-[#18327b] flex items-center gap-2"
-          >
-            <MapPin className="w-4 h-4" />
-            <span>{language === 'hi' ? 'बिहार मास्टर डेटा' : 'Bihar Master Data'}</span>
           </button>
 
           {currentUser && currentUser.role === 'ADMIN' && (

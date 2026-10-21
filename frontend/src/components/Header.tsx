@@ -1,6 +1,7 @@
 import React from 'react';
 import { User as UserIcon, LogOut, ShieldCheck } from 'lucide-react';
 import { User } from '../types';
+import { getRoleLabel, getUserDisplayName } from '../utils/userDisplay';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -53,13 +54,13 @@ export const Header: React.FC<HeaderProps> = ({
           {currentUser ? (
             <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full shadow-sm">
               <div className="w-8 h-8 rounded-full bg-[#18327b] text-white flex items-center justify-center font-bold text-xs">
-                {currentUser.name.charAt(0)}
+                {getUserDisplayName(currentUser.name).charAt(0)}
               </div>
               <div className="text-left text-xs">
-                <div className="font-bold text-gray-900 leading-none">{currentUser.name}</div>
+                <div className="font-bold text-gray-900 leading-none">{getUserDisplayName(currentUser.name)}</div>
                 <div className="text-[#18327b] font-semibold text-[11px] flex items-center gap-1 mt-0.5">
                   <ShieldCheck className="w-3 h-3 text-amber-500" />
-                  {currentUser.role}
+                  {getRoleLabel(currentUser.role)}
                 </div>
               </div>
               <button

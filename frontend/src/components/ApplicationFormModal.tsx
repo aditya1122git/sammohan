@@ -290,17 +290,14 @@ export const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-[#C35504] flex items-center justify-center font-bold text-sm shadow">
-              01
-            </span>
             <div>
               <h3 className="text-lg font-bold">
-                {language === 'hi' ? 'नया आवेदन / शिकायत पंजीकरण' : 'Section 1 — New Application / Complaint Entry'}
+                {language === 'hi' ? 'नया आवेदन / शिकायत पंजीकरण' : 'New Application / Complaint Entry'}
               </h3>
               <p className="text-xs text-blue-200">
                 {language === 'hi'

@@ -115,17 +115,6 @@ router.post('/:applicationId/add', authenticateToken, requireWrite, async (req: 
       }
     });
 
-    // Record Audit Log
-    await db.auditLog.create({
-      data: {
-        applicationId,
-        entityType: 'APPLICATION',
-        action: 'UPDATE',
-        details: `Follow-up added: "${actionTaken}". Notes: "${reminderNotes}". Reassigned to: ${updateData.assignedEmployee || app.assignedEmployee}`,
-        performedBy: req.user?.email || 'staff',
-        ipAddress: req.ip
-      }
-    });
 
     res.status(201).json({
       success: true,
@@ -184,16 +173,6 @@ router.post('/:applicationId/reopen', requireReviewerOrAdmin, async (req: Authen
       }
     });
 
-    await db.auditLog.create({
-      data: {
-        applicationId,
-        entityType: 'APPLICATION',
-        action: 'REOPEN',
-        details: `Application reopened by ${req.user?.email}. Reason: ${reopenReason.trim()}`,
-        performedBy: req.user?.email || 'officer',
-        ipAddress: req.ip
-      }
-    });
 
     res.json({
       success: true,

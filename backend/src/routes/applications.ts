@@ -226,17 +226,6 @@ router.post('/', requireDataEntryOrAdmin, async (req: AuthenticatedRequest, res:
       }
     });
 
-    // Audit log
-    await db.auditLog.create({
-      data: {
-        applicationId: created.id,
-        entityType: 'APPLICATION',
-        action: 'CREATE',
-        details: `Application ${created.applicationId} registered for ${created.applicantName} (${created.verifiedAcCode} - ${created.constituency?.name || created.customConstituency}). Category: "${created.categoryName}". Priority: ${created.priority}`,
-        performedBy: (req as any).user ? (req as any).user.email : 'Citizen / Intake Desk',
-        ipAddress: req.ip
-      }
-    });
 
     res.status(201).json({
       success: true,
@@ -395,7 +384,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/applications/:id - Detailed view with audit logs and follow-up trail
+// GET /api/applications/:id - Detailed view with follow-up history
 router.get('/:id', async (req, res) => {
   try {
     const idParam = req.params.id;
@@ -413,9 +402,6 @@ router.get('/:id', async (req, res) => {
         constituency: true,
         category: true,
         followUps: {
-          orderBy: { createdAt: 'desc' }
-        },
-        auditLogs: {
           orderBy: { createdAt: 'desc' }
         }
       }
@@ -606,16 +592,6 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response) => {
     });
 
     if (auditChanges.length > 0) {
-      await db.auditLog.create({
-        data: {
-          applicationId: id,
-          entityType: 'APPLICATION',
-          action: 'UPDATE',
-          details: auditChanges.join('; '),
-          performedBy: req.user?.email || 'staff',
-          ipAddress: req.ip
-        }
-      });
     }
 
     res.json({ success: true, application: updated });
@@ -667,16 +643,6 @@ router.get('/export/csv', async (req: AuthenticatedRequest, res: Response) => {
       include: { district: true, constituency: true, category: true }
     });
 
-    // Audit log CSV export
-    await db.auditLog.create({
-      data: {
-        entityType: 'APPLICATION',
-        action: 'EXPORT_CSV',
-        details: `Exported ${apps.length} applications to CSV file.`,
-        performedBy: req.user?.email || 'authenticated_user',
-        ipAddress: req.ip
-      }
-    }).catch(() => {});
 
     const headers = [
       'Application_ID',
@@ -740,10 +706,6 @@ router.delete('/:id', authenticateToken, requireWrite, async (req: Authenticated
       where: { applicationId: id }
     });
 
-    // Delete associated audit logs
-    await db.auditLog.deleteMany({
-      where: { applicationId: id }
-    });
 
     // Clean up physical document files if present in uploads
     if (existing.documents) {
@@ -767,16 +729,6 @@ router.delete('/:id', authenticateToken, requireWrite, async (req: Authenticated
       where: { id }
     });
 
-    // Record deletion event in system audit trail
-    await db.auditLog.create({
-      data: {
-        entityType: 'APPLICATION',
-        action: 'DELETE',
-        details: `Deleted application record ${existing.applicationId} (${existing.applicantName})`,
-        performedBy: req.user?.email || 'staff',
-        ipAddress: req.ip
-      }
-    }).catch(() => {});
 
     res.json({
       success: true,
@@ -810,10 +762,6 @@ router.post('/bulk-delete', authenticateToken, requireWrite, async (req: Authent
       where: { applicationId: { in: numericIds } }
     });
 
-    // Delete audit logs
-    await db.auditLog.deleteMany({
-      where: { applicationId: { in: numericIds } }
-    });
 
     // Delete physical files
     for (const a of apps) {
@@ -837,16 +785,6 @@ router.post('/bulk-delete', authenticateToken, requireWrite, async (req: Authent
       where: { id: { in: numericIds } }
     });
 
-    // Audit log
-    await db.auditLog.create({
-      data: {
-        entityType: 'APPLICATION',
-        action: 'BULK_DELETE',
-        details: `Bulk deleted ${deletedCount.count} application records.`,
-        performedBy: req.user?.email || 'staff',
-        ipAddress: req.ip
-      }
-    }).catch(() => {});
 
     res.json({
       success: true,
@@ -868,16 +806,6 @@ router.post(['/clear-all', '/clear-demo'], authenticateToken, requireWrite, asyn
     // Delete all applications
     const deletedCount = await db.application.deleteMany({});
 
-    // Audit log
-    await db.auditLog.create({
-      data: {
-        entityType: 'APPLICATION',
-        action: 'CLEAR_ALL',
-        details: `Cleared all application data (${deletedCount.count} records purged).`,
-        performedBy: req.user?.email || 'staff',
-        ipAddress: req.ip
-      }
-    }).catch(() => {});
 
     res.json({
       success: true,
@@ -887,198 +815,6 @@ router.post(['/clear-all', '/clear-demo'], authenticateToken, requireWrite, asyn
   } catch (error: any) {
     console.error('Error in clear-all:', error);
     res.status(500).json({ error: 'Failed to clear all applications' });
-  }
-});
-
-// POST /api/applications/restore-reference - Load reference applications with viewable documents
-router.post('/restore-reference', authenticateToken, requireWrite, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const uploadDir = path.resolve(__dirname, '../../uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Ensure sample documents exist in uploadDir
-    const samplePdfName = 'reference_grievance_representation.pdf';
-    const samplePdfPath = path.join(uploadDir, samplePdfName);
-    if (!fs.existsSync(samplePdfPath)) {
-      const minimalPdf = Buffer.from(
-        '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF'
-      );
-      fs.writeFileSync(samplePdfPath, minimalPdf);
-    }
-
-    const samplePngName = 'reference_inspection_evidence.png';
-    const samplePngPath = path.join(uploadDir, samplePngName);
-    if (!fs.existsSync(samplePngPath)) {
-      // 1x1 valid transparent PNG
-      const minimalPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
-      fs.writeFileSync(samplePngPath, minimalPng);
-    }
-
-    // Delete existing applications & follow-ups
-    await db.followUp.deleteMany({});
-    await db.application.deleteMany({});
-
-    // Fetch master districts
-    const districts = await db.district.findMany({ include: { constituencies: true } });
-    const categories = await db.complaintCategory.findMany();
-    const defaultCat = categories[0] || { id: 1, name: 'Roads and infrastructure' };
-
-    const officers = [
-      { name: 'Er. Ramesh Pandey (AE - RWD)', dept: 'Rural Works Department (RWD)' },
-      { name: 'Dr. K. K. Verma (Civil Surgeon)', dept: 'Health Department' },
-      { name: 'Vikramaditya Singh (SDO Social Welfare)', dept: 'Social Welfare Department' },
-      { name: 'Shyam Kishor (PHED SDO)', dept: 'Public Health Engineering Dept (PHED)' },
-      { name: 'Amitabh Sen (AEE - NBPDCL)', dept: 'Energy Department (NBPDCL)' },
-      { name: 'Praveen Kumar (Circle Officer)', dept: 'Revenue & Land Reforms' },
-      { name: 'Smt. Renu Kumari (District Education Officer)', dept: 'Education Department' },
-      { name: 'Alok Ranjan (Block Development Officer)', dept: 'Panchayati Raj Department' }
-    ];
-
-    const sampleSubjects = [
-      'Repair and widening of rural link road connecting panchayat to main highway',
-      'Burnt electrical distribution transformer replacement in farmer tubewell area',
-      'Drinking water pipeline leakage under Har Ghar Nal Ka Jal scheme',
-      'Non-disbursement of senior citizen pension arrears after Aadhaar linkage',
-      'Primary Health Centre doctor absence and medicine shortage in OPD',
-      'Urgent land mutation and demarcation appeal pending statutory timeline',
-      'PDS ration card renewal and biometric authentication verification issue',
-      'Community culvert damage and drainage waterlogging during monsoon',
-      'School building boundary wall repair and safe drinking water provision',
-      'Canal irrigation branch repair for rabi crop pre-sowing requirements'
-    ];
-
-    const applicantFirstNames = [
-      'Rajesh', 'Sita', 'Manoj', 'Sunita', 'Amit', 'Pooja', 'Dharmendra', 'Rameshwar',
-      'Mohammad', 'Kavita', 'Sanjay', 'Geeta', 'Anil', 'Anita', 'Vinod', 'Meena',
-      'Santosh', 'Rekha', 'Pankaj', 'Manju', 'Deepak', 'Suman', 'Arun', 'Savita',
-      'Mukesh', 'Mamta', 'Ajay', 'Shobha', 'Vikas', 'Pramila', 'Rakesh', 'Sarita',
-      'Birendra', 'Urmila', 'Narendra', 'Shakuntala', 'Ashok', 'Kaushalya', 'Subhash', 'Indu'
-    ];
-
-    const applicantLastNames = [
-      'Kumar', 'Devi', 'Singh', 'Yadav', 'Prasad', 'Thakur', 'Alam', 'Mishra',
-      'Sharma', 'Paswan', 'Rai', 'Manjhi', 'Chaudhary', 'Gupta', 'Verma', 'Khatoon'
-    ];
-
-    const currentYear = new Date().getFullYear();
-    const now = Date.now();
-
-    for (let i = 1; i <= 110; i++) {
-      const appId = `BACMS-${currentYear}-${String(i).padStart(4, '0')}`;
-      const fName = applicantFirstNames[(i - 1) % applicantFirstNames.length];
-      const lName = applicantLastNames[(i - 1) % applicantLastNames.length];
-      const fullName = `${fName} ${lName}`;
-      const mobile = `98${String(10000000 + (i * 7393) % 89999999).slice(0, 8)}`;
-      const priority = i <= 9 ? 'IMPORTANT' : 'NORMAL';
-
-      let status = 'PENDING';
-      let completedAt: Date | null = null;
-      let completionNotes: string | null = null;
-
-      if (i === 1) {
-        status = 'COMPLETED';
-        completedAt = new Date(now - 2 * 24 * 3600 * 1000);
-        completionNotes = 'Concrete culvert repaired and load-tested by RWD Bettiah division with quality inspection sign-off.';
-      } else if (i === 2) {
-        status = 'AWAITING_INFO';
-      } else if (i >= 61) {
-        status = 'IN_PROGRESS';
-      }
-
-      const dist = districts[(i - 1) % districts.length];
-      const acList = dist.constituencies;
-      const ac = acList.length > 0 ? acList[(i - 1) % acList.length] : null;
-      const cat = categories[(i - 1) % categories.length] || defaultCat;
-      const officer = officers[(i - 1) % officers.length];
-      const subject = sampleSubjects[(i - 1) % sampleSubjects.length];
-
-      const daysAgo = (i % 25) + 1;
-      const dateReceived = new Date(now - daysAgo * 24 * 3600 * 1000);
-      const nextFollowUp = status !== 'COMPLETED' ? new Date(now + ((i % 7) + 1) * 24 * 3600 * 1000) : null;
-
-      // Attach sample documents to the first 25 applications and every odd numbered one
-      let docsJson: string | null = null;
-      if (i <= 25 || i % 2 === 1) {
-        const sampleDocs = [
-          {
-            originalName: `Citizen_Representation_${appId}.pdf`,
-            filename: samplePdfName,
-            size: 42150,
-            mimetype: 'application/pdf',
-            url: `/api/documents/${samplePdfName}`
-          },
-          {
-            originalName: `Field_Inspection_Photo_${appId}.png`,
-            filename: samplePngName,
-            size: 108100,
-            mimetype: 'image/png',
-            url: `/api/documents/${samplePngName}`
-          }
-        ];
-        docsJson = JSON.stringify(sampleDocs);
-      }
-
-      const created = await db.application.create({
-        data: {
-          applicationId: appId,
-          applicantName: fullName,
-          mobileNumber: mobile,
-          address: `Ward No. ${(i % 18) + 1}, Panchayat Sector ${(i % 12) + 1}, ${dist.name}`,
-          districtId: dist.id,
-          constituencyId: ac ? ac.id : null,
-          verifiedAcCode: ac ? ac.acCode : 'AC-001',
-          isUnverifiedAc: false,
-          categoryId: cat.id,
-          categoryName: cat.name,
-          subject: `${priority === 'IMPORTANT' ? '[High Priority] ' : ''}${subject} - Sector ${(i % 15) + 1}`,
-          description: `Representation submitted regarding ${subject.toLowerCase()} in ${dist.name}. Official departmental intake and action timeline recorded.`,
-          priority: priority,
-          status: status,
-          assignedEmployee: officer.name,
-          internalRemarks: status === 'COMPLETED' ? completionNotes : `Assigned to ${officer.dept} for on-ground inspection.`,
-          documents: docsJson,
-          dateReceived: dateReceived,
-          nextFollowUpDate: nextFollowUp,
-          completedAt: completedAt,
-          completionNotes: completionNotes,
-          lastActionTaken: status === 'COMPLETED' ? 'Case resolved and disposed.' : `Referred to ${officer.name} for departmental follow-up.`
-        }
-      });
-
-      // Add follow up
-      await db.followUp.create({
-        data: {
-          applicationId: created.id,
-          actionTaken: 'Application Intake & Departmental Routing',
-          reminderNotes: `Application received and assigned to ${officer.name}. Supporting documents catalogued.`,
-          previousStatus: 'NEW',
-          newStatus: status,
-          actionBy: officer.name,
-          createdAt: dateReceived
-        }
-      });
-    }
-
-    await db.auditLog.create({
-      data: {
-        entityType: 'APPLICATION',
-        action: 'RESTORE_REFERENCE',
-        details: 'Restored 110 reference applications with supporting document attachments.',
-        performedBy: req.user?.email || 'admin',
-        ipAddress: req.ip
-      }
-    }).catch(() => {});
-
-    res.json({
-      success: true,
-      count: 110,
-      message: 'Successfully loaded 110 reference applications with supporting documents and active timelines.'
-    });
-  } catch (error: any) {
-    console.error('Error restoring reference data:', error);
-    res.status(500).json({ error: 'Failed to restore reference data: ' + error.message });
   }
 });
 

@@ -32,7 +32,6 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ onOpenSection, langu
             tabIndex={0}
             aria-label="New Application"
           >
-            <span className="bg-number">01</span>
             <div className="icon-box">
               <img src="/assets/Web_Images/1.png" alt="नया आवेदन" />
             </div>
@@ -57,7 +56,6 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ onOpenSection, langu
             tabIndex={0}
             aria-label="Application Status"
           >
-            <span className="bg-number">02</span>
             <div className="icon-box">
               <img src="/assets/Web_Images/2.png" alt="आवेदन की स्थिति" />
             </div>
@@ -82,7 +80,6 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ onOpenSection, langu
             tabIndex={0}
             aria-label="Reports & Analytics"
           >
-            <span className="bg-number">03</span>
             <div className="icon-box">
               <img src="/assets/Web_Images/4.png" alt="रिपोर्ट एवं विश्लेषण" />
             </div>

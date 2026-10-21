@@ -7,7 +7,6 @@ import {
   DashboardStats,
   DistrictStat,
   CategoryStat,
-  AuditLogRecord,
   ProjectAnnouncement,
   ProjectStats
 } from '../types';
@@ -97,6 +96,29 @@ export const api = {
     return data;
   },
 
+  async updateMyProfile(profile: { name: string; email: string; department?: string; phone?: string }): Promise<{ user: User; token: string; message: string }> {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(profile)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update profile');
+    if (data.token) localStorage.setItem('bacms_token', data.token);
+    return data;
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/auth/change-password`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to change password');
+    return data;
+  },
+
   async logout(): Promise<void> {
     const token = localStorage.getItem('bacms_token');
     if (token) {
@@ -119,13 +141,6 @@ export const api = {
     const res = await fetch(`${API_BASE}/auth/users`, { headers: getHeaders() });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to fetch users');
-    return data;
-  },
-
-  async getAuditLogs(): Promise<{ logs: AuditLogRecord[] }> {
-    const res = await fetch(`${API_BASE}/auth/audit-logs`, { headers: getHeaders() });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch audit logs');
     return data;
   },
 
@@ -441,16 +456,6 @@ export const api = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to update settings');
-    return data;
-  },
-
-  async restoreReferenceData(): Promise<{ success: boolean; count: number; message: string }> {
-    const res = await fetch(`${API_BASE}/applications/restore-reference`, {
-      method: 'POST',
-      headers: getHeaders()
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to restore reference data');
     return data;
   },
 

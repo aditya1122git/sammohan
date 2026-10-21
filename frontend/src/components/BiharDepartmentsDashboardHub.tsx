@@ -413,7 +413,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           
-          <div className="space-y-3 max-w-3xl">
+          <div className="min-w-0 space-y-3 max-w-3xl">
             {/* Top Pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs sm:text-sm font-semibold text-amber-300 backdrop-blur-md">
               <Landmark className="w-4 h-4 text-amber-300" />
@@ -441,20 +441,20 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
           </div>
 
           {/* Quick Metrics Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-auto">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center">
+          <div className="grid min-w-0 w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:w-[460px] lg:flex-none">
+            <div className="min-w-0 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center">
               <div className="text-2xl sm:text-3xl font-black text-amber-400">48</div>
               <div className="text-[11px] sm:text-xs font-bold text-blue-100 uppercase tracking-wider mt-1">
                 {language === 'hi' ? 'कुल विभाग' : 'Departments'}
               </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center">
+            <div className="min-w-0 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center">
               <div className="text-2xl sm:text-3xl font-black text-emerald-400">{totalTrackedProjects}</div>
               <div className="text-[11px] sm:text-xs font-bold text-blue-100 uppercase tracking-wider mt-1">
                 {language === 'hi' ? 'सक्रिय परियोजनाएं' : 'Active Projects'}
               </div>
             </div>
-            <div className="col-span-2 sm:col-span-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center">
+            <div className="min-w-0 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center">
               <div className="text-xl sm:text-2xl font-black text-amber-300">
                 ₹{(totalBudgetCr / 1000).toFixed(1)}k Cr
               </div>
@@ -644,18 +644,18 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
         </div>
       )}
 
-      {/* 4. EXPANSIVE DEPARTMENT MODAL (Full View & In-Place Editing) */}
+      {/* Full-page department workspace */}
       {activeDept && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
-          <div className="bg-white rounded-3xl w-full max-w-5xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-hidden bg-white sm:top-[70px] animate-fadeIn">
+          <section className="flex h-full min-w-0 w-full flex-col overflow-hidden bg-white" aria-label="Department details">
             
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#0d225c] via-[#122e7a] to-[#18327b] text-white p-5 sm:p-6 relative flex-shrink-0">
+            {/* Page Header */}
+            <div className="relative flex-shrink-0 bg-gradient-to-r from-[#0d225c] via-[#122e7a] to-[#18327b] px-4 py-4 text-white sm:px-8 sm:py-5 lg:px-10">
               
               <button
                 onClick={() => setActiveDept(null)}
                 className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition"
-                aria-label="Close Modal"
+                aria-label={language === 'hi' ? 'विभाग पृष्ठ बंद करें' : 'Close department page'}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -693,8 +693,8 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                 </div>
               </div>
 
-              {/* Modal Tabs Bar */}
-              <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/15 overflow-x-auto">
+              {/* Page Tabs Bar */}
+              <div className="flex max-w-full items-center gap-2 mt-4 pt-4 border-t border-white/15 overflow-x-auto pb-1">
                 <button
                   onClick={() => setModalTab('profile')}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
@@ -737,8 +737,9 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
             </div>
 
-            {/* Modal Body (Scrollable) */}
-            <div className="p-5 sm:p-7 overflow-y-auto flex-1 bg-slate-50 space-y-6">
+            {/* Page Body */}
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-slate-50">
+              <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 p-4 sm:p-7 lg:p-8">
               
               {/* TAB 1: COMPLETE DEPARTMENT PROFILE */}
               {modalTab === 'profile' && (() => {
@@ -1387,9 +1388,10 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                 </div>
               )}
 
+              </div>
             </div>
 
-          </div>
+          </section>
         </div>
       )}
 

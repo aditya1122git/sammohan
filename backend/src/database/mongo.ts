@@ -93,16 +93,6 @@ const followUpSchema = new Schema({
   actionBy: { type: String, required: true }
 }, commonOptions);
 
-const auditLogSchema = new Schema({
-  id: { type: Number, unique: true, index: true },
-  applicationId: { type: Number, index: true },
-  entityType: { type: String, required: true },
-  action: { type: String, required: true },
-  details: { type: String, required: true },
-  performedBy: { type: String, required: true },
-  ipAddress: String
-}, commonOptions);
-
 const settingSchema = new Schema({
   id: { type: Number, unique: true, index: true },
   maxUploadSizeMb: { type: Number, default: 200 },
@@ -154,7 +144,6 @@ const models = {
   complaintCategory: mongoose.models.ComplaintCategory || mongoose.model('ComplaintCategory', categorySchema),
   application: mongoose.models.Application || mongoose.model('Application', applicationSchema),
   followUp: mongoose.models.FollowUp || mongoose.model('FollowUp', followUpSchema),
-  auditLog: mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema),
   systemSetting: mongoose.models.SystemSetting || mongoose.model('SystemSetting', settingSchema),
   passwordResetToken: mongoose.models.PasswordResetToken || mongoose.model('PasswordResetToken', passwordResetSchema),
   projectAnnouncement: mongoose.models.ProjectAnnouncement || mongoose.model('ProjectAnnouncement', projectSchema)
@@ -356,7 +345,6 @@ async function hydrateRelations(name: string, record: any, include: any): Promis
     if (include.constituency) result.constituency = record.constituencyId ? await related('assemblyConstituency', false, { id: record.constituencyId }, include.constituency) : null;
     if (include.category) result.category = record.categoryId ? await related('complaintCategory', false, { id: record.categoryId }, include.category) : null;
     if (include.followUps) result.followUps = await related('followUp', true, { applicationId: record.id }, include.followUps);
-    if (include.auditLogs) result.auditLogs = await related('auditLog', true, { applicationId: record.id }, include.auditLogs);
     if (include._count) result._count = {
       ...(include._count.select?.followUps ? { followUps: await repositories.followUp.count({ where: { applicationId: record.id } }) } : {})
     };

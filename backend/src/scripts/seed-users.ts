@@ -3,7 +3,7 @@ import { connectDatabase, db, disconnectDatabase } from '../database/mongo';
 
 const users = [
   {
-    name: 'Dr. Anand Kumar (System Administrator)',
+    name: 'Dr. Anand Kumar',
     email: 'admin@assembly.bihar.gov',
     password: process.env.SEED_ADMIN_PASSWORD || 'Admin@Bihar2026',
     role: 'ADMIN',
@@ -11,7 +11,7 @@ const users = [
     phone: '9835012345'
   },
   {
-    name: 'Sunita Devi (Data Entry Operator)',
+    name: 'Sunita Devi',
     email: 'dataentry@assembly.bihar.gov',
     password: process.env.SEED_DATA_ENTRY_PASSWORD || 'DataEntry@2026',
     role: 'DATA_ENTRY',
@@ -19,7 +19,7 @@ const users = [
     phone: '9835023456'
   },
   {
-    name: 'Rajesh Ranjan (Reviewing Officer)',
+    name: 'Rajesh Ranjan',
     email: 'reviewer@assembly.bihar.gov',
     password: process.env.SEED_REVIEWER_PASSWORD || 'Reviewer@2026',
     role: 'REVIEWER',
@@ -27,7 +27,7 @@ const users = [
     phone: '9835034567'
   },
   {
-    name: 'Pooja Verma (Read-Only Viewer)',
+    name: 'Pooja Verma',
     email: 'readonly@assembly.bihar.gov',
     password: process.env.SEED_READONLY_PASSWORD || 'Auditor@2026',
     role: 'READONLY',

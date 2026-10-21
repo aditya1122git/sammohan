@@ -11,7 +11,7 @@ async function main() {
   // 1. Seed Users
   const usersData = [
     {
-      name: 'Dr. Anand Kumar (System Administrator)',
+      name: 'Dr. Anand Kumar',
       email: 'admin@assembly.bihar.gov',
       password: await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD || 'Admin@Bihar2026', 10),
       role: 'ADMIN',
@@ -19,7 +19,7 @@ async function main() {
       phone: '9835012345'
     },
     {
-      name: 'Sunita Devi (Data Entry Operator)',
+      name: 'Sunita Devi',
       email: 'dataentry@assembly.bihar.gov',
       password: await bcrypt.hash(process.env.SEED_DATA_ENTRY_PASSWORD || 'DataEntry@2026', 10),
       role: 'DATA_ENTRY',
@@ -27,7 +27,7 @@ async function main() {
       phone: '9835023456'
     },
     {
-      name: 'Rajesh Ranjan (Reviewing Officer)',
+      name: 'Rajesh Ranjan',
       email: 'reviewer@assembly.bihar.gov',
       password: await bcrypt.hash(process.env.SEED_REVIEWER_PASSWORD || 'Reviewer@2026', 10),
       role: 'REVIEWER',
@@ -35,7 +35,7 @@ async function main() {
       phone: '9835034567'
     },
     {
-      name: 'Pooja Verma (Read-Only Viewer)',
+      name: 'Pooja Verma',
       email: 'readonly@assembly.bihar.gov',
       password: await bcrypt.hash(process.env.SEED_READONLY_PASSWORD || 'Auditor@2026', 10),
       role: 'READONLY',
@@ -383,18 +383,7 @@ async function main() {
       }
     });
 
-    // Add audit log
-    await db.auditLog.create({
-      data: {
-        applicationId: created.id,
-        entityType: 'APPLICATION',
-        action: 'CREATE',
-        details: `Application ${app.applicationId} registered for ${app.applicantName} (${ac.acCode} - ${ac.name}, ${app.districtName})`,
-        performedBy: 'admin@assembly.bihar.gov',
-        ipAddress: '127.0.0.1'
-      }
-    });
-    console.log(`Seeded ${sampleApps.length} sample applications with follow-ups and audit logs.`);
+    console.log(`Seeded ${sampleApps.length} sample applications with follow-ups.`);
   }
   } else {
     console.log('Skipping sample demo applications (Master data initialized cleanly).');

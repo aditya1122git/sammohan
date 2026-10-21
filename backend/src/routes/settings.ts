@@ -78,15 +78,6 @@ router.put('/', authenticateToken, requireAdmin, async (req: AuthenticatedReques
       update: dataToUpdate
     });
 
-    await db.auditLog.create({
-      data: {
-        entityType: 'SETTINGS',
-        action: 'UPDATE',
-        details: `System settings updated: Max upload: ${updated.maxUploadSizeMb}MB, Support Email: ${updated.supportEmail || 'None'}, Working Hours: ${updated.workingHours || 'None'}`,
-        performedBy: req.user?.email || 'admin',
-        ipAddress: req.ip
-      }
-    });
 
     res.json({
       success: true,

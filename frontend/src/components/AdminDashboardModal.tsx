@@ -3,25 +3,29 @@ import {
   X,
   Shield,
   Users,
-  Settings,
   FolderPlus,
-  History,
   Lock,
   UserPlus,
   CheckCircle,
   FileText,
   Save,
-  AlertCircle
+  AlertCircle,
+  UserCircle,
+  Pencil,
+  KeyRound,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { api } from '../services/api';
-import { User, ComplaintCategory, AuditLogRecord, SystemSettings } from '../types';
+import { User, ComplaintCategory } from '../types';
+import { getRoleLabel, getUserDisplayName } from '../utils/userDisplay';
 
 interface AdminDashboardModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: User | null;
   language: 'hi' | 'en';
-  onSettingsUpdated?: (settings: SystemSettings) => void;
+  onCurrentUserUpdated?: (user: User) => void;
 }
 
 export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
@@ -29,31 +33,48 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   onClose,
   currentUser,
   language,
-  onSettingsUpdated
+  onCurrentUserUpdated
 }) => {
-  const [activeTab, setActiveTab] = useState<'users' | 'categories' | 'audit' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'profile' | 'users' | 'categories'>('profile');
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<ComplaintCategory[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLogRecord[]>([]);
+
+  // Admin Profile State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profileDepartment, setProfileDepartment] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showPasswordCard, setShowPasswordCard] = useState(false);
 
   // New Category State
   const [newCatName, setNewCatName] = useState('');
   const [newCatCode, setNewCatCode] = useState('');
   const [newCatDesc, setNewCatDesc] = useState('');
 
-  // Settings State
-  const [maxUploadSizeMb, setMaxUploadSizeMb] = useState<number>(200);
-  const [supportEmail, setSupportEmail] = useState<string>('');
-  const [supportPhone, setSupportPhone] = useState<string>('');
-  const [workingHours, setWorkingHours] = useState<string>('');
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const [settingsMsg, setSettingsMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
   useEffect(() => {
     if (isOpen && currentUser?.role === 'ADMIN') {
       loadAdminData();
     }
   }, [isOpen, activeTab]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setProfileName(getUserDisplayName(currentUser.name));
+      setProfileEmail(currentUser.email);
+      setProfileDepartment(currentUser.department || '');
+      setProfilePhone(currentUser.phone || '');
+    }
+  }, [currentUser]);
 
   const loadAdminData = async () => {
     try {
@@ -63,17 +84,6 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
       } else if (activeTab === 'categories') {
         const res = await api.getCategories();
         setCategories(res.categories);
-      } else if (activeTab === 'audit') {
-        const res = await api.getAuditLogs();
-        setAuditLogs(res.logs);
-      } else if (activeTab === 'settings') {
-        const res = await api.getSettings();
-        if (res.settings) {
-          setMaxUploadSizeMb(res.settings.maxUploadSizeMb || 200);
-          setSupportEmail(res.settings.supportEmail || '');
-          setSupportPhone(res.settings.supportPhone || '');
-          setWorkingHours(res.settings.workingHours || '');
-        }
       }
     } catch (e) {
       console.error(e);
@@ -98,40 +108,52 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
     }
   };
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSavingSettings(true);
-    setSettingsMsg(null);
+    setProfileMsg(null);
+    setIsSavingProfile(true);
+    try {
+      const res = await api.updateMyProfile({
+        name: profileName.trim(),
+        email: profileEmail.trim(),
+        department: profileDepartment.trim(),
+        phone: profilePhone.trim()
+      });
+      setProfileMsg({ type: 'success', text: res.message || 'Profile updated successfully.' });
+      setIsEditingProfile(false);
+      if (onCurrentUserUpdated) onCurrentUserUpdated(res.user);
+    } catch (err: any) {
+      setProfileMsg({ type: 'error', text: err.message || 'Failed to update profile.' });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
-    // Email validation if provided
-    if (supportEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail.trim())) {
-      setSettingsMsg({ type: 'error', text: 'Please enter a valid support email address or leave blank.' });
-      setIsSavingSettings(false);
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMsg(null);
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'New password and confirmation do not match.' });
       return;
     }
-
+    setIsChangingPassword(true);
     try {
-      const res = await api.updateSettings({
-        maxUploadSizeMb: Number(maxUploadSizeMb) || 200,
-        supportEmail: supportEmail.trim() || null,
-        supportPhone: supportPhone.trim() || null,
-        workingHours: workingHours.trim() || null
-      });
-      setSettingsMsg({ type: 'success', text: 'System settings successfully updated and saved!' });
-      if (onSettingsUpdated && res.settings) {
-        onSettingsUpdated(res.settings);
-      }
+      const res = await api.changePassword(currentPassword, newPassword);
+      setPasswordMsg({ type: 'success', text: res.message || 'Password changed successfully.' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (err: any) {
-      setSettingsMsg({ type: 'error', text: err.message || 'Failed to update system settings' });
+      setPasswordMsg({ type: 'error', text: err.message || 'Failed to change password.' });
     } finally {
-      setIsSavingSettings(false);
+      setIsChangingPassword(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-amber-700 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
@@ -139,10 +161,10 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
             <Shield className="w-6 h-6 text-amber-200" />
             <div>
               <h3 className="text-lg font-bold">
-                {language === 'hi' ? 'प्रशासनिक नियंत्रण कक्ष' : 'Section 7 — System Administration Console'}
+                {language === 'hi' ? 'प्रशासनिक नियंत्रण कक्ष' : 'System Administration Console'}
               </h3>
               <p className="text-xs text-amber-100">
-                User Security, Category Governance, System Configuration & Tamper-Evident Audit Logs
+                User Security, Category Governance & System Configuration
               </p>
             </div>
           </div>
@@ -153,6 +175,18 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
 
         {/* Tab Headers */}
         <div className="bg-gray-100 border-b border-gray-200 px-6 pt-2 flex items-center gap-2 text-xs flex-shrink-0">
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-4 py-2 font-bold rounded-t-lg transition flex items-center gap-1.5 ${
+              activeTab === 'profile'
+                ? 'bg-white text-gray-900 border-t-2 border-amber-600 shadow-sm'
+                : 'text-gray-600 hover:text-black'
+            }`}
+          >
+            <UserCircle className="w-3.5 h-3.5" />
+            <span>Admin Profile</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('users')}
             className={`px-4 py-2 font-bold rounded-t-lg transition flex items-center gap-1.5 ${
@@ -177,34 +211,171 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
             <span>Complaint Categories Manager</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition flex items-center gap-1.5 ${
-              activeTab === 'settings'
-                ? 'bg-white text-gray-900 border-t-2 border-amber-600 shadow-sm'
-                : 'text-gray-600 hover:text-black'
-            }`}
-          >
-            <Settings className="w-3.5 h-3.5" />
-            <span>System Settings & Limits</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('audit')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition flex items-center gap-1.5 ${
-              activeTab === 'audit'
-                ? 'bg-white text-gray-900 border-t-2 border-amber-600 shadow-sm'
-                : 'text-gray-600 hover:text-black'
-            }`}
-          >
-            <History className="w-3.5 h-3.5" />
-            <span>Security Audit Logs</span>
-          </button>
         </div>
 
         {/* Body Content */}
         <div className="p-6 overflow-y-auto flex-grow text-xs">
-          {/* TAB 1: Users */}
+          {/* TAB 1: Admin Profile */}
+          {activeTab === 'profile' && currentUser && (
+            <div className={`grid grid-cols-1 gap-6 ${showPasswordCard ? 'xl:grid-cols-2 max-w-6xl' : 'max-w-3xl'}`}>
+              <section className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm bg-white">
+                <div className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center border border-white/25">
+                      <UserCircle className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold">Administrator Profile</h4>
+                      <p className="text-amber-100 mt-0.5">Account and official contact details</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPasswordMsg(null);
+                        setShowPasswordCard(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-900 transition"
+                    >
+                      <KeyRound className="w-3.5 h-3.5" />
+                      Change Password
+                    </button>
+                    {!isEditingProfile && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileMsg(null);
+                          setIsEditingProfile(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white text-amber-800 font-bold hover:bg-amber-50 transition"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit Profile
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <form onSubmit={handleSaveProfile} className="p-5 space-y-4">
+                  {profileMsg && (
+                    <div className={`p-3 rounded-lg flex items-center gap-2 ${profileMsg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      {profileMsg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                      <span>{profileMsg.text}</span>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block font-bold text-gray-700 mb-1">Full Name</label>
+                      <input required minLength={2} disabled={!isEditingProfile} value={profileName} onChange={(e) => setProfileName(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-100 disabled:text-gray-700 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block font-bold text-gray-700 mb-1">Email Address</label>
+                      <input required type="email" disabled={!isEditingProfile} value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-100 disabled:text-gray-700 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-gray-700 mb-1">Role</label>
+                      <input disabled value="Administrator" className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-700 font-bold" />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-gray-700 mb-1">Account Status</label>
+                      <input disabled value={currentUser.isActive === false ? 'Inactive' : 'Active'} className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-emerald-700 font-bold" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block font-bold text-gray-700 mb-1">Department / Office</label>
+                      <input disabled={!isEditingProfile} value={profileDepartment} onChange={(e) => setProfileDepartment(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-100 disabled:text-gray-700 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block font-bold text-gray-700 mb-1">Phone Number</label>
+                      <input disabled={!isEditingProfile} value={profilePhone} onChange={(e) => setProfilePhone(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 disabled:bg-gray-100 disabled:text-gray-700 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                  </div>
+
+                  {isEditingProfile && (
+                    <div className="flex items-center gap-2 pt-2">
+                      <button type="submit" disabled={isSavingProfile} className="inline-flex items-center gap-1.5 bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-lg disabled:opacity-60">
+                        <Save className="w-3.5 h-3.5" />
+                        {isSavingProfile ? 'Saving...' : 'Save Profile'}
+                      </button>
+                      <button type="button" onClick={() => {
+                        setProfileName(getUserDisplayName(currentUser.name));
+                        setProfileEmail(currentUser.email);
+                        setProfileDepartment(currentUser.department || '');
+                        setProfilePhone(currentUser.phone || '');
+                        setProfileMsg(null);
+                        setIsEditingProfile(false);
+                      }} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-bold hover:bg-gray-50">
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </form>
+              </section>
+
+              {showPasswordCard && (
+              <section className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm bg-white self-start animate-fadeIn">
+                <div className="bg-slate-800 text-white p-5 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                      <KeyRound className="w-5 h-5 text-amber-300" />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold">Change Password</h4>
+                      <p className="text-slate-300 mt-0.5">Verify the current password before setting a new one</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => {
+                    setShowPasswordCard(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setPasswordMsg(null);
+                  }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="Close change password card">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <form onSubmit={handleChangePassword} className="p-5 space-y-4">
+                  {passwordMsg && (
+                    <div className={`p-3 rounded-lg flex items-center gap-2 ${passwordMsg.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                      {passwordMsg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                      <span>{passwordMsg.text}</span>
+                    </div>
+                  )}
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">Current Password</label>
+                    <div className="relative">
+                      <input required type={showCurrentPassword ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 outline-none focus:ring-2 focus:ring-amber-600" />
+                      <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" aria-label="Toggle current password visibility">
+                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">New Password</label>
+                    <div className="relative">
+                      <input required minLength={8} type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 outline-none focus:ring-2 focus:ring-amber-600" />
+                      <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" aria-label="Toggle new password visibility">
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-gray-500 mt-1">Use at least 8 characters.</p>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">Confirm New Password</label>
+                    <input required minLength={8} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-amber-600" />
+                  </div>
+                  <button type="submit" disabled={isChangingPassword} className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-2.5 rounded-lg disabled:opacity-60">
+                    <Lock className="w-3.5 h-3.5" />
+                    {isChangingPassword ? 'Changing Password...' : 'Change Password'}
+                  </button>
+                </form>
+              </section>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: Users */}
           {activeTab === 'users' && (
             <div className="space-y-6">
               <div className="border rounded-xl overflow-hidden shadow-sm">
@@ -221,7 +392,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                   <tbody className="divide-y divide-gray-200">
                     {users.map((u) => (
                       <tr key={u.id} className="hover:bg-amber-50/30">
-                        <td className="py-2.5 px-3 font-bold text-gray-900">{u.name}</td>
+                        <td className="py-2.5 px-3 font-bold text-gray-900">{getUserDisplayName(u.name)}</td>
                         <td className="py-2.5 px-3 text-gray-600 font-mono">{u.email}</td>
                         <td className="py-2.5 px-3">
                           <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
@@ -230,7 +401,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                             u.role === 'DATA_ENTRY' ? 'bg-blue-100 text-blue-700' :
                             'bg-gray-100 text-gray-700'
                           }`}>
-                            {u.role}
+                            {getRoleLabel(u.role)}
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-gray-600">{u.department || 'General Administration'}</td>
@@ -318,147 +489,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
             </div>
           )}
 
-          {/* TAB 3: System Settings */}
-          {activeTab === 'settings' && (
-            <div className="space-y-6 max-w-3xl">
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 text-amber-900 font-bold text-sm mb-1">
-                  <Settings className="w-4 h-4 text-amber-700" />
-                  <span>Configurable Support & Storage Settings</span>
-                </div>
-                <p className="text-gray-500 text-xs mb-4">
-                  Manage file upload limits and public contact information. Support email, phone, and working hours will only appear across the top header and footer once configured here.
-                </p>
 
-                {settingsMsg && (
-                  <div className={`p-3 rounded-lg text-xs mb-4 flex items-center gap-2 ${
-                    settingsMsg.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-700'
-                  }`}>
-                    {settingsMsg.type === 'success' ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <AlertCircle className="w-4 h-4 text-red-600" />}
-                    <span>{settingsMsg.text}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleSaveSettings} className="space-y-4">
-                  <div>
-                    <label className="block font-bold text-gray-700 mb-1">
-                      Maximum File Upload Size (MB per attachment) <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min={1}
-                        max={1000}
-                        required
-                        value={maxUploadSizeMb}
-                        onChange={(e) => setMaxUploadSizeMb(Number(e.target.value))}
-                        className="w-36 border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-amber-600 font-mono font-bold"
-                      />
-                      <span className="text-gray-500 text-xs">MB (Default: 200 MB per file, configurable up to 1000 MB. Allowed: PDF, JPG, PNG, DOC, XLS)</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-gray-700 mb-1">
-                      Support Email Address
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="e.g. contact@portal.local"
-                      value={supportEmail}
-                      onChange={(e) => setSupportEmail(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-amber-600"
-                    />
-                    <p className="text-[11px] text-gray-500 mt-0.5">
-                      Leave empty to hide email from public portal.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-gray-700 mb-1">
-                      Support Contact Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Contact helpline number (Optional)"
-                      value={supportPhone}
-                      onChange={(e) => setSupportPhone(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-amber-600"
-                    />
-                    <p className="text-[11px] text-gray-500 mt-0.5">
-                      Optional contact phone number. Displayed only if configured.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-gray-700 mb-1">
-                      Office Working Hours
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Mon - Fri: 9:30 AM - 5:30 PM (IST)"
-                      value={workingHours}
-                      onChange={(e) => setWorkingHours(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-amber-600"
-                    />
-                    <p className="text-[11px] text-gray-500 mt-0.5">
-                      Displayed in top bar and footer only when provided.
-                    </p>
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      disabled={isSavingSettings}
-                      className="bg-amber-700 hover:bg-amber-800 text-white font-bold px-6 py-2.5 rounded-lg transition flex items-center gap-2 shadow"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>{isSavingSettings ? 'Saving Settings...' : 'Save Configuration'}</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: Audit Logs */}
-          {activeTab === 'audit' && (
-            <div className="space-y-4">
-              <div className="border rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-100 text-gray-700 uppercase font-bold border-b">
-                    <tr>
-                      <th className="py-2.5 px-3">Timestamp</th>
-                      <th className="py-2.5 px-3">Action Type</th>
-                      <th className="py-2.5 px-3">Performed By</th>
-                      <th className="py-2.5 px-3">Audit Details</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {auditLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-gray-50">
-                        <td className="py-2.5 px-3 text-gray-500 whitespace-nowrap font-mono text-[11px]">
-                          {new Date(log.createdAt).toLocaleString()}
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
-                            log.action === 'CREATE' ? 'bg-green-100 text-green-800' :
-                            log.action === 'UPDATE' ? 'bg-blue-100 text-blue-800' :
-                            log.action === 'REOPEN' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {log.action}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 font-mono text-gray-700">{log.performedBy}</td>
-                        <td className="py-2.5 px-3 text-gray-900">{log.details}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

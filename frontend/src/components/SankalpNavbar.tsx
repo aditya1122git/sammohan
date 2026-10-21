@@ -154,7 +154,7 @@ export const SankalpNavbar: React.FC<SankalpNavbarProps> = ({
               </button>
             </div>
 
-            {/* Dashboard Login Button */}
+            {/* Login Button */}
             {isLoggedIn ? (
               <button
                 type="button"
@@ -185,10 +185,7 @@ export const SankalpNavbar: React.FC<SankalpNavbarProps> = ({
                 </div>
                 <div className="text-left leading-tight">
                   <div className="text-xs font-black uppercase tracking-wider">
-                    {language === 'hi' ? 'डैशबोर्ड लॉगिन' : 'Dashboard Login'}
-                  </div>
-                  <div className="text-[9px] text-slate-800 font-medium">
-                    {language === 'hi' ? 'सुरक्षित प्रवेश' : 'Secure Entry'}
+                    {language === 'hi' ? 'लॉगिन' : 'Login'}
                   </div>
                 </div>
                 <ArrowUpRight className="w-3.5 h-3.5 ml-0.5 text-slate-900" />
@@ -269,7 +266,7 @@ export const SankalpNavbar: React.FC<SankalpNavbarProps> = ({
               <span>
                 {isLoggedIn
                   ? language === 'hi' ? 'डैशबोर्ड में प्रवेश करें' : 'Enter Dashboard'
-                  : language === 'hi' ? 'डैशबोर्ड लॉगिन (सुरक्षित प्रवेश)' : 'Dashboard Login (Secure Entry)'}
+                  : language === 'hi' ? 'लॉगिन' : 'Login'}
               </span>
               <ArrowUpRight className="w-4 h-4" />
             </button>
