@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { ProjectAnnouncement, ProjectStage, User } from '../types';
 import { api } from '../services/api';
+import { FullPageWorkspace } from './FullPageWorkspace';
 
 interface ProjectTableModalProps {
   isOpen: boolean;
@@ -239,7 +240,7 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
+    <FullPageWorkspace>
       <div className="relative bg-white w-full h-full flex flex-col overflow-hidden">
         
         {/* Modal Top Header */}
@@ -670,6 +671,6 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
         </div>
 
       </div>
-    </div>
+    </FullPageWorkspace>
   );
 };

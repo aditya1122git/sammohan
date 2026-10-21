@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { District, ComplaintCategory, Application, User } from '../types';
+import { FullPageWorkspace } from './FullPageWorkspace';
 
 interface ApplicationTableModalProps {
   isOpen: boolean;
@@ -84,6 +85,8 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
   const [editEmployee, setEditEmployee] = useState('');
   const [editRemarks, setEditRemarks] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [clearDialog, setClearDialog] = useState<'closed' | 'confirm' | 'loading' | 'success' | 'error'>('closed');
+  const [clearDialogMessage, setClearDialogMessage] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -217,18 +220,29 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
   };
 
   const handleClearAllData = async () => {
-    if (!window.confirm(language === 'hi'
-      ? 'चेतावनी: क्या आप वाकई डेटाबेस के सभी आवेदन रिकॉर्ड स्थायी रूप से हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।'
-      : 'Warning: Are you sure you want to permanently clear all application records from your database? This action cannot be undone.')) {
-      return;
-    }
+    setClearDialogMessage('');
+    setClearDialog('confirm');
+  };
+
+  const confirmClearAllData = async () => {
+    setClearDialog('loading');
     try {
-      await api.clearAllApplications();
-      fetchApplications();
+      const result = await api.clearAllApplications();
+      await fetchApplications();
       if (onDataChanged) onDataChanged();
-      alert(language === 'hi' ? 'डेटाबेस से सभी आवेदन सफलतापूर्वक हटा दिए गए।' : 'All application records have been permanently cleared.');
+      setClearDialogMessage(
+        language === 'hi'
+          ? `डेटाबेस से ${result.count} आवेदन रिकॉर्ड सफलतापूर्वक हटा दिए गए।`
+          : `${result.count} application records were permanently removed from the database.`
+      );
+      setClearDialog('success');
     } catch (e: any) {
-      alert('Error clearing applications: ' + (e.response?.data?.message || e.message));
+      setClearDialogMessage(
+        language === 'hi'
+          ? `डेटा हटाया नहीं जा सका: ${e.response?.data?.message || e.message}`
+          : `Unable to clear the data: ${e.response?.data?.message || e.message}`
+      );
+      setClearDialog('error');
     }
   };
 
@@ -237,7 +251,7 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
+    <FullPageWorkspace>
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-3.5 flex items-center justify-between flex-shrink-0">
@@ -755,7 +769,84 @@ export const ApplicationTableModal: React.FC<ApplicationTableModalProps> = ({
             </div>
           </div>
         )}
+
+        {clearDialog !== 'closed' && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+            <section className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+              <div className="flex items-center gap-4 bg-slate-900 px-6 py-5 text-white">
+                <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl ${
+                  clearDialog === 'success'
+                    ? 'bg-emerald-500'
+                    : clearDialog === 'error'
+                      ? 'bg-red-500'
+                      : 'bg-[#C35504]'
+                }`}>
+                  {clearDialog === 'loading' ? (
+                    <RefreshCw className="h-6 w-6 animate-spin" />
+                  ) : clearDialog === 'success' ? (
+                    <CheckCircle className="h-6 w-6" />
+                  ) : clearDialog === 'error' ? (
+                    <AlertCircle className="h-6 w-6" />
+                  ) : (
+                    <Database className="h-6 w-6" />
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-lg font-black">
+                    {clearDialog === 'success'
+                      ? (language === 'hi' ? 'डेटा हटा दिया गया' : 'Data Cleared')
+                      : clearDialog === 'error'
+                        ? (language === 'hi' ? 'कार्रवाई विफल' : 'Action Failed')
+                        : (language === 'hi' ? 'सभी आवेदन डेटा हटाएं?' : 'Clear All Application Data?')}
+                  </h4>
+                  <p className="mt-0.5 text-xs text-slate-300">
+                    {language === 'hi' ? 'सम्मोहन डेटाबेस प्रबंधन' : 'Sammohan database management'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <p className="text-sm leading-6 text-slate-600">
+                  {clearDialogMessage || (language === 'hi'
+                    ? 'सभी आवेदन और उनके फॉलो-अप रिकॉर्ड स्थायी रूप से हट जाएंगे। यह कार्रवाई पूर्ववत नहीं की जा सकती।'
+                    : 'All applications and their follow-up records will be permanently removed. This action cannot be undone.')}
+                </p>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  {clearDialog === 'confirm' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setClearDialog('closed')}
+                        className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                      >
+                        {language === 'hi' ? 'रद्द करें' : 'Cancel'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirmClearAllData}
+                        className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {language === 'hi' ? 'हाँ, सभी डेटा हटाएं' : 'Yes, Clear All Data'}
+                      </button>
+                    </>
+                  )}
+                  {(clearDialog === 'success' || clearDialog === 'error') && (
+                    <button
+                      type="button"
+                      onClick={() => setClearDialog('closed')}
+                      className="rounded-xl bg-[#1C4D8D] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#163c6f]"
+                    >
+                      {language === 'hi' ? 'पूर्ण' : 'Done'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
-    </div>
+    </FullPageWorkspace>
   );
 };

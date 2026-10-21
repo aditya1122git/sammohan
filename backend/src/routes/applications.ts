@@ -51,6 +51,12 @@ router.use(authenticateToken);
 
 // POST /api/applications - Create new application (Restricted to Admin and Data Entry)
 router.post('/', requireDataEntryOrAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  // Complaint/application intake has been retired in favor of project announcements.
+  // Keep the historical read/report routes available, but reject all new complaint records.
+  return res.status(410).json({
+    error: 'Complaint registration has been removed. Use the announcement/project entry workflow.'
+  });
+
   try {
     const {
       applicantName,

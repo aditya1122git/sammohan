@@ -19,6 +19,7 @@ import {
 import { api } from '../services/api';
 import { User, ComplaintCategory } from '../types';
 import { getRoleLabel, getUserDisplayName } from '../utils/userDisplay';
+import { FullPageWorkspace } from './FullPageWorkspace';
 
 interface AdminDashboardModalProps {
   isOpen: boolean;
@@ -153,7 +154,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
+    <FullPageWorkspace>
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-amber-700 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
@@ -492,6 +493,6 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
 
         </div>
       </div>
-    </div>
+    </FullPageWorkspace>
   );
 };

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ProjectAnnouncement, District } from '../types';
 import { BIHAR_48_DEPARTMENTS } from '../data/biharDepartments';
+import { FullPageWorkspace } from './FullPageWorkspace';
 
 interface ProjectFormModalProps {
   isOpen: boolean;
@@ -147,7 +148,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
+    <FullPageWorkspace>
       <div className="relative bg-white w-full h-full overflow-hidden flex flex-col">
         
         {/* Header */}
@@ -467,6 +468,6 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         </form>
 
       </div>
-    </div>
+    </FullPageWorkspace>
   );
 };

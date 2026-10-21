@@ -200,17 +200,6 @@ export const api = {
   },
 
   // --- Applications ---
-  async createApplication(payload: any): Promise<{ success: boolean; applicationId: string; application: Application }> {
-    const res = await fetch(`${API_BASE}/applications`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to create application');
-    return data;
-  },
-
   async getApplications(params: Record<string, any> = {}): Promise<{
     total: number;
     page: number;

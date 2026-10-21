@@ -13,10 +13,11 @@ import {
   Tooltip
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { FullPageWorkspace } from './FullPageWorkspace';
 import {
   X,
   BarChart3,
-  PieChart,
+  Database,
   Calendar,
   Download,
   TrendingUp,
@@ -163,21 +164,19 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
+    <FullPageWorkspace>
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="bg-[#1C4D8D] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={() => setActiveReportTab('overview')}
-              className={`pb-2 px-3 font-bold border-b-2 transition flex items-center gap-1.5 ${
-                activeReportTab === 'overview'
-                  ? 'border-[#C35504] text-[#C35504]'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
+              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-orange-400 bg-[#C35504] text-white shadow-md transition hover:bg-orange-700"
+              aria-label={language === 'hi' ? 'विजुअल एनालिटिक्स देखें' : 'Open visual analytics overview'}
+              title={language === 'hi' ? 'विजुअल एनालिटिक्स' : 'Analytics overview'}
             >
-              <PieChart className="w-3.5 h-3.5" />
-              <span>Visual Overview</span>
+              <Database className="h-5 w-5" />
             </button>
 
             <div>
@@ -320,7 +319,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
 
         {/* Tab Content */}
         <div className="p-6 overflow-y-auto overscroll-contain flex-grow text-xs">
-          {/* TAB 1: Chart.js Visual Overview */}
+          {/* Chart.js analytics overview */}
           {activeReportTab === 'overview' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -543,6 +542,6 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </FullPageWorkspace>
   );
 };

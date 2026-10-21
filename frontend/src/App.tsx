@@ -12,7 +12,6 @@ import { Footer } from './components/Footer';
 import { BiharGovHeader } from './components/BiharGovHeader';
 
 // Modals & Detailed Views
-import { ApplicationFormModal } from './components/ApplicationFormModal';
 import { ApplicationTableModal } from './components/ApplicationTableModal';
 import { AnalyticsModal } from './components/AnalyticsModal';
 import { AdminDashboardModal } from './components/AdminDashboardModal';
@@ -292,19 +291,24 @@ export const App: React.FC = () => {
       if (currentUser?.role === 'READONLY') {
         setRbacNotice(
           language === 'hi'
-            ? 'अनुमति अस्वीकृत: केवल-पठन (Read-Only) खाता नए आवेदन दर्ज नहीं कर सकता।'
-            : 'Permission Denied: Read-Only viewer account cannot submit new applications.'
+            ? 'अनुमति अस्वीकृत: केवल-पठन (Read-Only) खाता नई घोषणा या परियोजना दर्ज नहीं कर सकता।'
+            : 'Permission Denied: Read-Only viewer account cannot create announcements or projects.'
         );
         return;
       }
       if (currentUser?.role === 'REVIEWER') {
         setRbacNotice(
           language === 'hi'
-            ? 'अनुमति अस्वीकृत: समीक्षक (Reviewer) खाता केवल मामलों की समीक्षा, स्थिति अद्यतन और फॉलो-अप कर सकता है।'
-            : 'Permission Denied: Reviewer role cannot create applications. Reviewers can inspect records, update statuses, and add follow-ups.'
+            ? 'अनुमति अस्वीकृत: समीक्षक (Reviewer) खाता नई घोषणा या परियोजना दर्ज नहीं कर सकता।'
+            : 'Permission Denied: Reviewer role cannot create announcements or projects.'
         );
         return;
       }
+
+      setActiveModal(null);
+      setEditingProject(null);
+      setIsProjectFormOpen(true);
+      return;
     }
 
     if (section === 'admin' && currentUser?.role !== 'ADMIN') {
@@ -332,10 +336,6 @@ export const App: React.FC = () => {
     setDetailAppId(app.id);
     setActiveView('application-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleApplicationCreated = (_app: Application) => {
-    loadDashboardStats();
   };
 
   // Loading Screen
@@ -532,8 +532,19 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
         onOpenSection={handleOpenSection}
         onGoHome={() => {
-          setActiveView('landing');
-          window.history.pushState({}, '', '/');
+          setActiveModal(null);
+          setLoginModalOpen(false);
+          setSelectedApp(null);
+          setDetailAppId(null);
+          setRbacNotice(null);
+          setIsProjectTableOpen(false);
+          setIsProjectFormOpen(false);
+          setEditingProject(null);
+          setIsProjectDetailOpen(false);
+          setSelectedProject(null);
+          setActiveView('dashboard');
+          window.history.pushState({}, '', '#dashboard');
+          window.dispatchEvent(new Event('sammohan:dashboard-home'));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onSearch={(_query) => {
@@ -1091,14 +1102,6 @@ export const App: React.FC = () => {
       <Footer onOpenSection={handleOpenSection} language={language} />
 
       {/* --- Modals & Drawers --- */}
-      <ApplicationFormModal
-        isOpen={activeModal === 'form'}
-        onClose={() => setActiveModal(null)}
-        onApplicationCreated={handleApplicationCreated}
-        language={language}
-        settings={settings}
-      />
-
       <ApplicationTableModal
         isOpen={activeModal === 'table'}
         onClose={() => setActiveModal(null)}

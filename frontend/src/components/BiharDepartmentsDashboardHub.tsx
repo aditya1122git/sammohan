@@ -33,6 +33,7 @@ import {
 import { BIHAR_48_DEPARTMENTS, BiharDepartment } from '../data/biharDepartments';
 import { DEFAULT_48_DEPARTMENT_PROFILES, DepartmentProfileData } from '../data/departmentProfiles';
 import { ProjectAnnouncement, ProjectStage } from '../types';
+import { FullPageWorkspace } from './FullPageWorkspace';
 
 export const BIHAR_38_DISTRICTS = [
   'पटना (Patna)',
@@ -169,7 +170,16 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
     };
     checkHashForDept();
     window.addEventListener('hashchange', checkHashForDept);
-    return () => window.removeEventListener('hashchange', checkHashForDept);
+    const handleDashboardHome = () => {
+      setActiveDept(null);
+      setModalTab('profile');
+    };
+    window.addEventListener('sammohan:dashboard-home', handleDashboardHome);
+
+    return () => {
+      window.removeEventListener('hashchange', checkHashForDept);
+      window.removeEventListener('sammohan:dashboard-home', handleDashboardHome);
+    };
   }, []);
 
   // Combined projects list (Prop projects + local manual projects)
@@ -646,8 +656,8 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
       {/* Full-page department workspace */}
       {activeDept && (
-        <div className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-hidden overscroll-none bg-white sm:top-[70px] animate-fadeIn">
-          <section className="flex h-full min-w-0 w-full flex-col overflow-hidden bg-white" aria-label="Department details">
+        <FullPageWorkspace>
+          <section className="h-full min-w-0 w-full overflow-y-auto overflow-x-hidden overscroll-contain bg-slate-50" aria-label="Department details">
             
             {/* Page Header */}
             <div className="relative flex-shrink-0 bg-gradient-to-r from-[#0d225c] via-[#122e7a] to-[#18327b] px-4 py-4 text-white sm:px-8 sm:py-5 lg:px-10">
@@ -738,7 +748,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
             </div>
 
             {/* Page Body */}
-            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-slate-50">
+            <div className="min-w-0 bg-slate-50">
               <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 p-4 sm:p-7 lg:p-8">
               
               {/* TAB 1: COMPLETE DEPARTMENT PROFILE */}
@@ -1392,7 +1402,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
             </div>
 
           </section>
-        </div>
+        </FullPageWorkspace>
       )}
 
     </div>
