@@ -1,48 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip
-} from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
-import { FullPageWorkspace } from './FullPageWorkspace';
-import {
-  X,
-  BarChart3,
-  Database,
-  Calendar,
-  Download,
-  TrendingUp,
-  MapPin,
-  Clock,
-  Users,
-  CheckCircle2,
-  AlertTriangle,
-  FileSpreadsheet
-} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Tooltip } from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
+import { AlertTriangle, BarChart3, Building2, CheckCircle2, Database, Download, IndianRupee, MapPin, Search, TrendingUp, X } from 'lucide-react';
 import { api } from '../services/api';
-import { DashboardStats, DistrictStat, CategoryStat } from '../types';
+import { ProjectAnnouncement, ProjectStats } from '../types';
+import { FullPageWorkspace } from './FullPageWorkspace';
 
-ChartJS.register(
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip
-);
+ChartJS.register(ArcElement, BarElement, CategoryScale, Legend, LinearScale, Tooltip);
 
 interface AnalyticsModalProps {
   isOpen: boolean;
@@ -50,497 +14,223 @@ interface AnalyticsModalProps {
   language: 'hi' | 'en';
 }
 
-export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({
-  isOpen,
-  onClose,
-  language
-}) => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [districtStats, setDistrictStats] = useState<DistrictStat[]>([]);
-  const [categoryStats, setCategoryStats] = useState<CategoryStat[]>([]);
-  const [ageingReport, setAgeingReport] = useState<any>(null);
-  const [workloadReport, setWorkloadReport] = useState<any[]>([]);
+type AnalyticsTab = 'overview' | 'departments' | 'districts' | 'projects';
+
+const stageLabels: Record<string, string> = {
+  PLANNING: 'Planning / DPR',
+  TENDERING: 'Tendering',
+  UNDER_CONSTRUCTION: 'Under Construction',
+  COMMISSIONED: 'Commissioned',
+  OPERATIONAL: 'Operational'
+};
+
+const formatCrore = (value: number) => `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })} Cr`;
+
+export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose, language }) => {
+  const [stats, setStats] = useState<ProjectStats | null>(null);
+  const [projects, setProjects] = useState<ProjectAnnouncement[]>([]);
+  const [activeTab, setActiveTab] = useState<AnalyticsTab>('overview');
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeReportTab, setActiveReportTab] = useState<'overview' | 'districts' | 'categories' | 'ageing' | 'workload'>('overview');
-  const [districtSearch, setDistrictSearch] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
-      loadAllReports();
-    }
+    if (!isOpen) return;
+    const loadProjectAnalytics = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const [statsResponse, projectsResponse] = await Promise.all([
+          api.getProjectStats(),
+          api.getProjects({ limit: 1000 })
+        ]);
+        setStats(statsResponse.stats);
+        setProjects(projectsResponse.projects || []);
+      } catch (err: any) {
+        setError(err.message || 'Unable to load project analytics.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProjectAnalytics();
   }, [isOpen]);
 
-  const loadAllReports = async () => {
-    setLoading(true);
-    try {
-      const [s, d, c, a, w] = await Promise.all([
-        api.getDashboardStats(),
-        api.getDistrictReports(),
-        api.getCategoryReports(),
-        api.getAgeingReport(),
-        api.getEmployeeWorkload()
-      ]);
-      setStats(s);
-      setDistrictStats(d.districts);
-      setCategoryStats(c.categories);
-      setAgeingReport(a);
-      setWorkloadReport(w.workload);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredProjects = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return projects;
+    return projects.filter((project) =>
+      [project.referenceId, project.department, project.commitment, project.districtName, project.location]
+        .some((value) => String(value || '').toLowerCase().includes(query))
+    );
+  }, [projects, search]);
 
-  const filteredDistricts = districtStats.filter(d =>
-    d.districtName.toLowerCase().includes(districtSearch.toLowerCase()) ||
-    d.districtCode.toLowerCase().includes(districtSearch.toLowerCase())
-  );
+  const utilizationRate = stats?.totalSanctionedCr
+    ? Math.round((stats.totalUtilizedCr / stats.totalSanctionedCr) * 100)
+    : 0;
 
-  const statusChartData = {
-    labels: ['Pending', 'In Progress', 'Awaiting Info', 'Completed', 'Overdue'],
+  const stageChartData = {
+    labels: Object.keys(stageLabels).map((key) => stageLabels[key]),
     datasets: [{
-      data: [stats?.pending || 0, stats?.inProgress || 0, stats?.awaitingInfo || 0, stats?.completed || 0, stats?.overdue || 0],
-      backgroundColor: ['#f59e0b', '#4f46e5', '#9333ea', '#059669', '#e11d48'],
+      data: Object.keys(stageLabels).map((key) => stats?.stageBreakdown?.[key] || 0),
+      backgroundColor: ['#f59e0b', '#0ea5e9', '#4f46e5', '#10b981', '#047857'],
       borderColor: '#ffffff',
       borderWidth: 3,
       hoverOffset: 8
     }]
   };
 
-  const topDistricts = [...districtStats]
-    .sort((a, b) => b.totalApplications - a.totalApplications)
-    .slice(0, 10);
-  const districtChartData = {
-    labels: topDistricts.map((district) => district.districtName),
+  const topDepartments = (stats?.departmentBreakdown || []).slice(0, 10);
+  const departmentProjectChart = {
+    labels: topDepartments.map((item) => item.name),
+    datasets: [{ label: 'Projects', data: topDepartments.map((item) => item.count), backgroundColor: '#1C4D8D', borderRadius: 7 }]
+  };
+  const departmentBudgetChart = {
+    labels: topDepartments.map((item) => item.name),
     datasets: [
-      { label: 'Total', data: topDistricts.map((district) => district.totalApplications), backgroundColor: '#1C4D8D', borderRadius: 6 },
-      { label: 'Completed', data: topDistricts.map((district) => district.completedCount), backgroundColor: '#10b981', borderRadius: 6 },
-      { label: 'Pending', data: topDistricts.map((district) => district.pendingCount), backgroundColor: '#f59e0b', borderRadius: 6 }
+      { label: 'Sanctioned (₹ Cr)', data: topDepartments.map((item) => item.sanctionedCr), backgroundColor: '#1C4D8D', borderRadius: 6 },
+      { label: 'Utilized (₹ Cr)', data: topDepartments.map((item) => item.utilizedCr), backgroundColor: '#f59e0b', borderRadius: 6 }
     ]
   };
-
-  const topCategories = [...categoryStats]
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 8);
-  const categoryChartData = {
-    labels: topCategories.map((category) => category.categoryName),
-    datasets: [{
-      label: 'Applications',
-      data: topCategories.map((category) => category.total),
-      backgroundColor: ['#1C4D8D', '#C35504', '#0891b2', '#7c3aed', '#059669', '#dc2626', '#ca8a04', '#475569'],
-      borderRadius: 7
-    }]
+  const topDistricts = (stats?.districtBreakdown || []).slice(0, 12);
+  const districtChart = {
+    labels: topDistricts.map((item) => item.name),
+    datasets: [{ label: 'Projects', data: topDistricts.map((item) => item.count), backgroundColor: '#C35504', borderRadius: 7 }]
   };
 
-  const ageingBrackets = ageingReport?.brackets || [];
-  const ageingChartData = {
-    labels: ageingBrackets.map((bracket: any) => bracket.label),
-    datasets: [{
-      label: 'Pending cases',
-      data: ageingBrackets.map((bracket: any) => bracket.count),
-      borderColor: '#C35504',
-      backgroundColor: 'rgba(195, 85, 4, 0.16)',
-      pointBackgroundColor: '#1C4D8D',
-      pointRadius: 5,
-      tension: 0.35,
-      fill: true
-    }]
-  };
-
-  const commonChartOptions: any = {
+  const chartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 18, font: { family: 'Poppins', size: 11 } } },
+      legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 16, font: { family: 'Poppins', size: 10 } } },
       tooltip: { backgroundColor: '#0f172a', padding: 12, titleFont: { family: 'Poppins' }, bodyFont: { family: 'Poppins' } }
     },
     scales: {
-      x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 10 }, maxRotation: 35 } },
+      x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 9 }, maxRotation: 35 } },
       y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.18)' }, ticks: { precision: 0, font: { family: 'Poppins', size: 10 } } }
     }
   };
 
+  const exportProjectsCsv = () => {
+    const rows = [
+      ['Reference ID', 'Department', 'Project', 'District', 'Stage', 'Progress %', 'Sanctioned Cr', 'Utilized Cr', 'Delayed'],
+      ...filteredProjects.map((project) => [project.referenceId, project.department, project.commitment, project.districtName || project.location, stageLabels[project.currentStage] || project.currentStage, project.verifiedProgress, project.sanctionedAmountCr, project.utilizedAmountCr, project.isDelayed ? 'Yes' : 'No'])
+    ];
+    const csv = rows.map((row) => row.map((value) => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `sammohan-project-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!isOpen) return null;
+
+  const tabs: Array<{ id: AnalyticsTab; label: string; icon: React.ReactNode }> = [
+    { id: 'overview', label: language === 'hi' ? 'समग्र अवलोकन' : 'Overview', icon: <BarChart3 className="h-4 w-4" /> },
+    { id: 'departments', label: language === 'hi' ? 'विभागवार प्रदर्शन' : 'Department Performance', icon: <Building2 className="h-4 w-4" /> },
+    { id: 'districts', label: language === 'hi' ? 'जिलावार परियोजनाएं' : 'District Projects', icon: <MapPin className="h-4 w-4" /> },
+    { id: 'projects', label: language === 'hi' ? 'परियोजना प्रगति' : 'Project Progress', icon: <TrendingUp className="h-4 w-4" /> }
+  ];
 
   return (
     <FullPageWorkspace>
-      <div className="bg-white w-full h-full overflow-hidden flex flex-col">
-        {/* Modal Header */}
-        <div className="bg-[#1C4D8D] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setActiveReportTab('overview')}
-              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-orange-400 bg-[#C35504] text-white shadow-md transition hover:bg-orange-700"
-              aria-label={language === 'hi' ? 'विजुअल एनालिटिक्स देखें' : 'Open visual analytics overview'}
-              title={language === 'hi' ? 'विजुअल एनालिटिक्स' : 'Analytics overview'}
-            >
+      <div className="flex h-full w-full flex-col overflow-hidden bg-white">
+        <header className="flex flex-shrink-0 items-center justify-between gap-4 bg-[#1C4D8D] px-5 py-4 text-white sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button type="button" onClick={() => setActiveTab('overview')} className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-orange-400 bg-[#C35504] shadow-md hover:bg-orange-700" aria-label="Open analytics overview">
               <Database className="h-5 w-5" />
             </button>
-
-            <div>
-              <h3 className="text-lg font-bold">
-                {language === 'hi' ? 'रिपोर्ट्स एवं डेटाबेस एनालिटिक्स' : 'Reports and Analytics Dashboard'}
-              </h3>
-              <p className="text-xs text-blue-200">
-                {language === 'hi'
-                  ? '38 जिले, 243 निर्वाचन क्षेत्र एवं श्रेणीवार वास्तविक डेटाबेस सांख्यिकी'
-                  : 'Database Statistics Across 38 Districts, 243 Constituencies & 14 Sectors'}
-              </p>
+            <div className="min-w-0">
+              <h3 className="truncate text-lg font-bold">{language === 'hi' ? 'परियोजना एवं बजट एनालिटिक्स' : 'Project and Budget Analytics'}</h3>
+              <p className="text-xs text-blue-200">{language === 'hi' ? '48 विभागों एवं 38 जिलों में परियोजना, बजट, प्रगति और माइलस्टोन की लाइव जानकारी' : 'Live project, budget, progress and milestone insights across 48 departments and 38 districts'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={onClose} className="p-1.5 hover:bg-white/20 rounded-full transition">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+          <button type="button" onClick={onClose} className="rounded-full p-1.5 transition hover:bg-white/20" aria-label="Close analytics"><X className="h-5 w-5" /></button>
+        </header>
 
-        {/* Real Metrics Cards Grid */}
-        <div className="p-6 bg-gray-50 border-b border-gray-200 flex-shrink-0">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-3 text-xs">
-            {/* Total */}
-            <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
-              <div className="text-[11px] text-gray-500 font-semibold uppercase">Total Apps</div>
-              <div className="text-2xl font-black text-[#1C4D8D] mt-1">{stats?.total ?? 0}</div>
-            </div>
-
-            {/* Important */}
-            <div className="bg-red-50 p-3 rounded-xl border border-red-200 shadow-sm text-center">
-              <div className="text-[11px] text-red-600 font-semibold uppercase">Important</div>
-              <div className="text-2xl font-black text-red-700 mt-1">{stats?.important ?? 0}</div>
-            </div>
-
-            {/* Normal */}
-            <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 shadow-sm text-center">
-              <div className="text-[11px] text-blue-600 font-semibold uppercase">Normal</div>
-              <div className="text-2xl font-black text-[#1C4D8D] mt-1">{stats?.normal ?? 0}</div>
-            </div>
-
-            {/* Pending */}
-            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 shadow-sm text-center">
-              <div className="text-[11px] text-amber-700 font-semibold uppercase">Pending</div>
-              <div className="text-2xl font-black text-amber-800 mt-1">{stats?.pending ?? 0}</div>
-            </div>
-
-            {/* In Progress */}
-            <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-200 shadow-sm text-center">
-              <div className="text-[11px] text-indigo-700 font-semibold uppercase">In Progress</div>
-              <div className="text-2xl font-black text-indigo-800 mt-1">{stats?.inProgress ?? 0}</div>
-            </div>
-
-            {/* Awaiting Info */}
-            <div className="bg-purple-50 p-3 rounded-xl border border-purple-200 shadow-sm text-center">
-              <div className="text-[11px] text-purple-700 font-semibold uppercase">Awaiting Info</div>
-              <div className="text-2xl font-black text-purple-800 mt-1">{stats?.awaitingInfo ?? 0}</div>
-            </div>
-
-            {/* Completed */}
-            <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 shadow-sm text-center">
-              <div className="text-[11px] text-emerald-700 font-semibold uppercase">Completed</div>
-              <div className="text-2xl font-black text-emerald-800 mt-1">{stats?.completed ?? 0}</div>
-            </div>
-
-            {/* Overdue */}
-            <div className="bg-rose-50 p-3 rounded-xl border border-rose-300 shadow-sm text-center">
-              <div className="text-[11px] text-rose-700 font-semibold uppercase">Overdue SLA</div>
-              <div className="text-2xl font-black text-rose-700 mt-1">{stats?.overdue ?? 0}</div>
-            </div>
-
-            {/* Today */}
-            <div className="bg-teal-50 p-3 rounded-xl border border-teal-200 shadow-sm text-center">
-              <div className="text-[11px] text-teal-700 font-semibold uppercase">Recv Today</div>
-              <div className="text-2xl font-black text-teal-800 mt-1">{stats?.receivedToday ?? 0}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Report Sub-Tabs */}
-        <div className="bg-white border-b px-6 pt-3 flex items-center justify-between text-xs flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setActiveReportTab('districts')}
-              className={`pb-2 px-3 font-bold border-b-2 transition flex items-center gap-1.5 ${
-                activeReportTab === 'districts'
-                  ? 'border-[#C35504] text-[#C35504]'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
-            >
-              <MapPin className="w-3.5 h-3.5" />
-              <span>District-Wise Breakdown (All 38)</span>
-            </button>
-
-            <button
-              onClick={() => setActiveReportTab('categories')}
-              className={`pb-2 px-3 font-bold border-b-2 transition flex items-center gap-1.5 ${
-                activeReportTab === 'categories'
-                  ? 'border-[#C35504] text-[#C35504]'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Complaint Categories (14 Sectors)</span>
-            </button>
-
-            <button
-              onClick={() => setActiveReportTab('ageing')}
-              className={`pb-2 px-3 font-bold border-b-2 transition flex items-center gap-1.5 ${
-                activeReportTab === 'ageing'
-                  ? 'border-[#C35504] text-[#C35504]'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Pending Ageing Analysis</span>
-            </button>
-
-            <button
-              onClick={() => setActiveReportTab('workload')}
-              className={`pb-2 px-3 font-bold border-b-2 transition flex items-center gap-1.5 ${
-                activeReportTab === 'workload'
-                  ? 'border-[#C35504] text-[#C35504]'
-                  : 'border-transparent text-gray-500 hover:text-gray-800'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Officer Workload</span>
-            </button>
-          </div>
-
-          <button
-            onClick={() => window.open(api.getExportCsvUrl({}), '_blank')}
-            className="text-xs text-[#1C4D8D] font-bold hover:underline flex items-center gap-1 pb-2"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download All Data CSV</span>
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6 overflow-y-auto overscroll-contain flex-grow text-xs">
-          {/* Chart.js analytics overview */}
-          {activeReportTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-bold text-slate-900">Application Status Mix</h4>
-                    <p className="text-[11px] text-slate-500 mt-1">Live distribution across workflow stages</p>
-                  </div>
-                  <div className="h-64">
-                    <Doughnut data={statusChartData} options={{ ...commonChartOptions, cutout: '68%', scales: undefined }} />
-                  </div>
-                </section>
-
-                <section className="xl:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                  <div className="mb-4 flex items-start justify-between gap-4">
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">Top District Performance</h4>
-                      <p className="text-[11px] text-slate-500 mt-1">Total, completed and pending applications in the busiest districts</p>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-full bg-blue-50 text-[#1C4D8D] font-bold">Top 10</span>
-                  </div>
-                  <div className="h-64">
-                    <Bar data={districtChartData} options={commonChartOptions} />
-                  </div>
-                </section>
+        <section className="flex-shrink-0 border-b border-slate-200 bg-slate-50 p-4 sm:p-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
+            {[
+              { label: 'Total Projects', value: stats?.totalAnnouncements ?? 0, tone: 'text-[#1C4D8D]', icon: <Database className="h-4 w-4" /> },
+              { label: 'Ongoing', value: stats?.ongoingProjects ?? 0, tone: 'text-indigo-700', icon: <TrendingUp className="h-4 w-4" /> },
+              { label: 'Completed', value: stats?.completedProjects ?? 0, tone: 'text-emerald-700', icon: <CheckCircle2 className="h-4 w-4" /> },
+              { label: 'Delayed', value: stats?.delayedProjects ?? 0, tone: 'text-rose-700', icon: <AlertTriangle className="h-4 w-4" /> },
+              { label: 'Sanctioned', value: formatCrore(stats?.totalSanctionedCr ?? 0), tone: 'text-[#1C4D8D]', icon: <IndianRupee className="h-4 w-4" /> },
+              { label: 'Utilized', value: formatCrore(stats?.totalUtilizedCr ?? 0), tone: 'text-amber-700', icon: <IndianRupee className="h-4 w-4" /> },
+              { label: 'Fund Utilization', value: `${utilizationRate}%`, tone: 'text-violet-700', icon: <BarChart3 className="h-4 w-4" /> },
+              { label: 'Avg. Progress', value: `${stats?.avgProgress ?? 0}%`, tone: 'text-cyan-700', icon: <TrendingUp className="h-4 w-4" /> }
+            ].map((metric) => (
+              <div key={metric.label} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase ${metric.tone}`}>{metric.icon}<span>{metric.label}</span></div>
+                <div className={`mt-1 text-lg font-black ${metric.tone}`}>{metric.value}</div>
               </div>
+            ))}
+          </div>
+        </section>
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-bold text-slate-900">Leading Complaint Categories</h4>
-                    <p className="text-[11px] text-slate-500 mt-1">Highest application volume by sector</p>
-                  </div>
-                  <div className="h-72">
-                    <Bar data={categoryChartData} options={{ ...commonChartOptions, indexAxis: 'y' }} />
-                  </div>
-                </section>
+        <nav className="flex flex-shrink-0 items-center justify-between gap-3 overflow-x-auto border-b border-slate-200 bg-white px-4 pt-3 sm:px-6">
+          <div className="flex items-center gap-1">
+            {tabs.map((tab) => (
+              <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 pb-2 text-xs font-bold transition ${activeTab === tab.id ? 'border-[#C35504] text-[#C35504]' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>{tab.icon}{tab.label}</button>
+            ))}
+          </div>
+          <button type="button" onClick={exportProjectsCsv} className="mb-2 flex items-center gap-1.5 whitespace-nowrap text-xs font-bold text-[#1C4D8D] hover:underline"><Download className="h-4 w-4" />{language === 'hi' ? 'प्रोजेक्ट CSV डाउनलोड करें' : 'Download Project CSV'}</button>
+        </nav>
 
-                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-bold text-slate-900">Pending Ageing Trend</h4>
-                    <p className="text-[11px] text-slate-500 mt-1">Open cases grouped by elapsed resolution time</p>
-                  </div>
-                  <div className="h-72">
-                    <Line data={ageingChartData} options={commonChartOptions} />
-                  </div>
-                </section>
-              </div>
+        <main className="flex-grow overflow-y-auto overscroll-contain bg-slate-50 p-4 text-xs sm:p-6">
+          {loading && <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 text-center font-bold text-[#1C4D8D]">Loading project analytics...</div>}
+          {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 font-semibold text-red-700">{error}</div>}
+
+          {!loading && !error && activeTab === 'overview' && (
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900">Project Stage Distribution</h4><p className="mt-1 text-[11px] text-slate-500">Current delivery stage of all registered projects</p>
+                <div className="mt-4 h-72"><Doughnut data={stageChartData} options={{ ...chartOptions, cutout: '66%', scales: undefined }} /></div>
+              </section>
+              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+                <h4 className="text-sm font-bold text-slate-900">Top Departments by Project Count</h4><p className="mt-1 text-[11px] text-slate-500">Departments with the highest number of tracked projects</p>
+                <div className="mt-4 h-72"><Bar data={departmentProjectChart} options={chartOptions} /></div>
+              </section>
+              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+                <h4 className="text-sm font-bold text-slate-900">Department Budget Utilization</h4><p className="mt-1 text-[11px] text-slate-500">Sanctioned and utilized funds for leading departments</p>
+                <div className="mt-4 h-80"><Bar data={departmentBudgetChart} options={chartOptions} /></div>
+              </section>
+              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900">Top Project Districts</h4><p className="mt-1 text-[11px] text-slate-500">Districts with the largest project footprint</p>
+                <div className="mt-4 h-80"><Bar data={districtChart} options={chartOptions} /></div>
+              </section>
             </div>
           )}
 
-          {/* TAB 1: District-Wise */}
-          {activeReportTab === 'districts' && (
+          {!loading && !error && activeTab === 'departments' && (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full min-w-[760px] text-left">
+              <thead className="border-b bg-slate-100 font-bold uppercase text-slate-700"><tr><th className="px-4 py-3">Department</th><th className="px-4 py-3 text-center">Projects</th><th className="px-4 py-3 text-right">Sanctioned</th><th className="px-4 py-3 text-right">Utilized</th><th className="px-4 py-3 text-right">Utilization</th></tr></thead>
+              <tbody className="divide-y divide-slate-100">{(stats?.departmentBreakdown || []).map((department) => {
+                const rate = department.sanctionedCr ? Math.round((department.utilizedCr / department.sanctionedCr) * 100) : 0;
+                return <tr key={department.name} className="hover:bg-blue-50/40"><td className="px-4 py-3 font-bold text-[#1C4D8D]">{department.name}</td><td className="px-4 py-3 text-center font-bold">{department.count}</td><td className="px-4 py-3 text-right">{formatCrore(department.sanctionedCr)}</td><td className="px-4 py-3 text-right font-semibold text-amber-700">{formatCrore(department.utilizedCr)}</td><td className="px-4 py-3 text-right"><span className="rounded-full bg-emerald-50 px-2.5 py-1 font-bold text-emerald-700">{rate}%</span></td></tr>;
+              })}</tbody>
+            </table></div>
+          )}
+
+          {!loading && !error && activeTab === 'districts' && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{(stats?.districtBreakdown || []).map((district, index) => (
+              <div key={district.name} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><div><div className="text-[10px] font-bold uppercase text-slate-400">District #{index + 1}</div><div className="mt-1 font-bold text-slate-900">{district.name}</div></div><div className="rounded-xl bg-blue-50 px-3 py-2 text-center text-[#1C4D8D]"><div className="text-lg font-black">{district.count}</div><div className="text-[9px] font-bold uppercase">Projects</div></div></div>
+            ))}</div>
+          )}
+
+          {!loading && !error && activeTab === 'projects' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <input
-                  type="text"
-                  placeholder="Filter by district name or code..."
-                  value={districtSearch}
-                  onChange={(e) => setDistrictSearch(e.target.value)}
-                  className="w-72 border border-gray-300 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#1C4D8D]"
-                />
-                <div className="text-gray-500 font-medium">
-                  Showing <strong>{filteredDistricts.length}</strong> of 38 Bihar Districts
-                </div>
-              </div>
-
-              <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-100 text-gray-700 uppercase font-bold border-b">
-                    <tr>
-                      <th className="py-2.5 px-3">District Code</th>
-                      <th className="py-2.5 px-3">District Name</th>
-                      <th className="py-2.5 px-3 text-center">Assembly Seats</th>
-                      <th className="py-2.5 px-3 text-center">Total Applications</th>
-                      <th className="py-2.5 px-3 text-center">Important</th>
-                      <th className="py-2.5 px-3 text-center">Normal</th>
-                      <th className="py-2.5 px-3 text-center">Pending</th>
-                      <th className="py-2.5 px-3 text-center">Completed</th>
-                      <th className="py-2.5 px-3 text-right">Resolution %</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filteredDistricts.map((d) => (
-                      <tr key={d.districtId} className="hover:bg-blue-50/40">
-                        <td className="py-2.5 px-3 font-mono font-bold text-gray-600">{d.districtCode}</td>
-                        <td className="py-2.5 px-3 font-bold text-[#1C4D8D]">{d.districtName}</td>
-                        <td className="py-2.5 px-3 text-center font-semibold">{d.totalSeats} ACs</td>
-                        <td className="py-2.5 px-3 text-center font-bold text-gray-900">{d.totalApplications}</td>
-                        <td className="py-2.5 px-3 text-center font-semibold text-red-600">{d.importantCount}</td>
-                        <td className="py-2.5 px-3 text-center font-semibold text-blue-600">{d.normalCount}</td>
-                        <td className="py-2.5 px-3 text-center font-semibold text-amber-600">{d.pendingCount}</td>
-                        <td className="py-2.5 px-3 text-center font-semibold text-emerald-600">{d.completedCount}</td>
-                        <td className="py-2.5 px-3 text-right">
-                          <span className={`font-bold px-2 py-0.5 rounded ${
-                            d.resolutionRate >= 50 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {d.resolutionRate}%
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"><div className="relative w-full max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reference, department, project or district..." className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 outline-none focus:ring-2 focus:ring-[#1C4D8D]" /></div><div className="font-semibold text-slate-500">Showing {filteredProjects.length} projects</div></div>
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full min-w-[1050px] text-left">
+                <thead className="border-b bg-slate-100 font-bold uppercase text-slate-700"><tr><th className="px-3 py-3">Reference</th><th className="px-3 py-3">Department / Project</th><th className="px-3 py-3">District</th><th className="px-3 py-3">Stage</th><th className="px-3 py-3 text-center">Progress</th><th className="px-3 py-3 text-right">Budget</th><th className="px-3 py-3 text-center">Status</th></tr></thead>
+                <tbody className="divide-y divide-slate-100">{filteredProjects.map((project) => (
+                  <tr key={project.id} className="hover:bg-blue-50/40"><td className="px-3 py-3 font-mono font-bold text-[#1C4D8D]">{project.referenceId}</td><td className="max-w-sm px-3 py-3"><div className="font-bold text-slate-900">{project.department}</div><div className="mt-0.5 truncate text-slate-500">{project.commitment}</div></td><td className="px-3 py-3">{project.districtName || project.location}</td><td className="px-3 py-3 font-semibold">{stageLabels[project.currentStage] || project.currentStage}</td><td className="px-3 py-3 text-center"><span className="font-bold text-indigo-700">{project.verifiedProgress}%</span></td><td className="px-3 py-3 text-right">{formatCrore(project.sanctionedAmountCr)}</td><td className="px-3 py-3 text-center">{project.isDelayed ? <span className="rounded-full bg-rose-100 px-2 py-1 font-bold text-rose-700">Delayed</span> : <span className="rounded-full bg-emerald-100 px-2 py-1 font-bold text-emerald-700">On Track</span>}</td></tr>
+                ))}</tbody>
+              </table></div>
             </div>
           )}
-
-          {/* TAB 2: Categories */}
-          {activeReportTab === 'categories' && (
-            <div className="space-y-4">
-              <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-100 text-gray-700 uppercase font-bold border-b">
-                    <tr>
-                      <th className="py-2.5 px-3">Category Code</th>
-                      <th className="py-2.5 px-3">Complaint Sector</th>
-                      <th className="py-2.5 px-3 text-center">Total Registered</th>
-                      <th className="py-2.5 px-3 text-center">Important</th>
-                      <th className="py-2.5 px-3 text-center">Normal</th>
-                      <th className="py-2.5 px-3 text-center">Pending</th>
-                      <th className="py-2.5 px-3 text-center">Resolved</th>
-                      <th className="py-2.5 px-3">Share %</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {categoryStats.map((c) => {
-                      const totalAll = stats?.total || 1;
-                      const share = Math.round((c.total / totalAll) * 100);
-                      return (
-                        <tr key={c.categoryId} className="hover:bg-blue-50/40">
-                          <td className="py-2.5 px-3 font-mono font-bold text-gray-600">{c.categoryCode}</td>
-                          <td className="py-2.5 px-3 font-bold text-[#1C4D8D]">{c.categoryName}</td>
-                          <td className="py-2.5 px-3 text-center font-bold text-gray-900">{c.total}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-red-600">{c.importantCount}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-blue-600">{c.normalCount}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-amber-600">{c.pendingCount}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-emerald-600">{c.completedCount}</td>
-                          <td className="py-2.5 px-3 w-44">
-                            <div className="flex items-center gap-2">
-                              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                <div
-                                  className="bg-[#C35504] h-2 rounded-full"
-                                  style={{ width: `${Math.max(4, share)}%` }}
-                                ></div>
-                              </div>
-                              <span className="font-bold text-gray-600 w-8">{share}%</span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: Ageing Analysis */}
-          {activeReportTab === 'ageing' && (
-            <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-gray-800">
-                <h4 className="font-bold text-sm text-[#1C4D8D] mb-1">
-                  Active Grievance Ageing & Disposal Timelines
-                </h4>
-                <p className="text-gray-600 text-xs">
-                  Applications pending beyond 30 days trigger automated high-priority executive alerts.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {ageingReport?.brackets?.map((b: any, idx: number) => (
-                  <div key={idx} className="bg-white border rounded-xl p-5 shadow-sm relative overflow-hidden">
-                    <div className="text-xs font-bold text-gray-500 uppercase">{b.label}</div>
-                    <div className="text-3xl font-black text-gray-900 mt-2">{b.count}</div>
-                    <div className="text-[11px] text-gray-500 mt-1">Cases in this age bracket</div>
-                    <div
-                      className="absolute bottom-0 left-0 w-full h-1.5"
-                      style={{ backgroundColor: b.color }}
-                    ></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: Workload */}
-          {activeReportTab === 'workload' && (
-            <div className="space-y-4">
-              <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-100 text-gray-700 uppercase font-bold border-b">
-                    <tr>
-                      <th className="py-2.5 px-3">Assigned Desk / Officer</th>
-                      <th className="py-2.5 px-3 text-center">Total Assigned</th>
-                      <th className="py-2.5 px-3 text-center">Pending / In-Progress</th>
-                      <th className="py-2.5 px-3 text-center">Important Cases</th>
-                      <th className="py-2.5 px-3 text-center">Completed</th>
-                      <th className="py-2.5 px-3 text-right">Completion Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {workloadReport.map((w, idx) => {
-                      const rate = w.total > 0 ? Math.round((w.completed / w.total) * 100) : 0;
-                      return (
-                        <tr key={idx} className="hover:bg-blue-50/40">
-                          <td className="py-2.5 px-3 font-bold text-gray-900">{w.employee}</td>
-                          <td className="py-2.5 px-3 text-center font-bold">{w.total}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-amber-600">{w.pending}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-red-600">{w.important}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold text-emerald-600">{w.completed}</td>
-                          <td className="py-2.5 px-3 text-right font-bold">{rate}%</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
+        </main>
       </div>
     </FullPageWorkspace>
   );

@@ -3,7 +3,6 @@ import {
   X,
   Shield,
   Users,
-  FolderPlus,
   Lock,
   UserPlus,
   CheckCircle,
@@ -14,10 +13,11 @@ import {
   Pencil,
   KeyRound,
   Eye,
-  EyeOff
+  EyeOff,
+  Trash2
 } from 'lucide-react';
 import { api } from '../services/api';
-import { User, ComplaintCategory } from '../types';
+import { User } from '../types';
 import { getRoleLabel, getUserDisplayName } from '../utils/userDisplay';
 import { FullPageWorkspace } from './FullPageWorkspace';
 
@@ -36,9 +36,22 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   language,
   onCurrentUserUpdated
 }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'users' | 'categories'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'users'>('profile');
   const [users, setUsers] = useState<User[]>([]);
-  const [categories, setCategories] = useState<ComplaintCategory[]>([]);
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState<User['role']>('DATA_ENTRY');
+  const [newUserDepartment, setNewUserDepartment] = useState('');
+  const [newUserPhone, setNewUserPhone] = useState('');
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [userMsg, setUserMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleteAdminPassword, setDeleteAdminPassword] = useState('');
+  const [showDeleteAdminPassword, setShowDeleteAdminPassword] = useState(false);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   // Admin Profile State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -56,11 +69,6 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showPasswordCard, setShowPasswordCard] = useState(false);
-
-  // New Category State
-  const [newCatName, setNewCatName] = useState('');
-  const [newCatCode, setNewCatCode] = useState('');
-  const [newCatDesc, setNewCatDesc] = useState('');
 
   useEffect(() => {
     if (isOpen && currentUser?.role === 'ADMIN') {
@@ -82,30 +90,62 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
       if (activeTab === 'users') {
         const res = await api.getUsers();
         setUsers(res.users);
-      } else if (activeTab === 'categories') {
-        const res = await api.getCategories();
-        setCategories(res.categories);
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const handleCreateCategory = async (e: React.FormEvent) => {
+  const resetNewUserForm = () => {
+    setNewUserName('');
+    setNewUserEmail('');
+    setNewUserPassword('');
+    setNewUserRole('DATA_ENTRY');
+    setNewUserDepartment('');
+    setNewUserPhone('');
+    setShowNewUserPassword(false);
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUserMsg(null);
+    setIsCreatingUser(true);
     try {
-      await api.createCategory({
-        name: newCatName.trim(),
-        code: newCatCode.trim().toUpperCase(),
-        description: newCatDesc.trim() || undefined
+      await api.createUser({
+        name: newUserName.trim(),
+        email: newUserEmail.trim(),
+        password: newUserPassword,
+        role: newUserRole,
+        department: newUserDepartment.trim() || undefined,
+        phone: newUserPhone.trim() || undefined
       });
-      alert('Category added successfully!');
-      setNewCatName('');
-      setNewCatCode('');
-      setNewCatDesc('');
-      loadAdminData();
+      resetNewUserForm();
+      setShowCreateUser(false);
+      setUserMsg({ type: 'success', text: 'User created successfully.' });
+      await loadAdminData();
     } catch (err: any) {
-      alert('Failed to create category: ' + err.message);
+      setUserMsg({ type: 'error', text: err.message || 'Failed to create user.' });
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteTarget || !deleteAdminPassword) return;
+    setUserMsg(null);
+    setIsDeletingUser(true);
+    try {
+      const deletedName = getUserDisplayName(deleteTarget.name);
+      await api.deleteUser(deleteTarget.id, deleteAdminPassword);
+      setDeleteTarget(null);
+      setDeleteAdminPassword('');
+      setShowDeleteAdminPassword(false);
+      setUserMsg({ type: 'success', text: `${deletedName} has been deleted.` });
+      await loadAdminData();
+    } catch (err: any) {
+      setUserMsg({ type: 'error', text: err.message || 'Failed to delete user.' });
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -165,7 +205,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                 {language === 'hi' ? 'प्रशासनिक नियंत्रण कक्ष' : 'System Administration Console'}
               </h3>
               <p className="text-xs text-amber-100">
-                User Security, Category Governance & System Configuration
+                User Security & Account Administration
               </p>
             </div>
           </div>
@@ -197,19 +237,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>Staff Users & Roles (4 Tiers)</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('categories')}
-            className={`px-4 py-2 font-bold rounded-t-lg transition flex items-center gap-1.5 ${
-              activeTab === 'categories'
-                ? 'bg-white text-gray-900 border-t-2 border-amber-600 shadow-sm'
-                : 'text-gray-600 hover:text-black'
-            }`}
-          >
-            <FolderPlus className="w-3.5 h-3.5" />
-            <span>Complaint Categories Manager</span>
+            <span>Staff Users & Roles</span>
           </button>
 
         </div>
@@ -379,8 +407,129 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
           {/* TAB 2: Users */}
           {activeTab === 'users' && (
             <div className="space-y-6">
-              <div className="border rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-base font-bold text-slate-900">Staff Users</h4>
+                  <p className="mt-0.5 text-slate-500">Create accounts, assign access roles and remove users.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserMsg(null);
+                    setShowCreateUser((value) => !value);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg bg-amber-700 px-4 py-2.5 font-bold text-white transition hover:bg-amber-800"
+                >
+                  {showCreateUser ? <X className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                  {showCreateUser ? 'Close Form' : 'Create New User'}
+                </button>
+              </div>
+
+              {userMsg && (
+                <div className={`flex items-center gap-2 rounded-lg border p-3 ${userMsg.type === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                  {userMsg.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                  <span>{userMsg.text}</span>
+                </div>
+              )}
+
+              {showCreateUser && (
+                <form onSubmit={handleCreateUser} className="rounded-2xl border border-amber-200 bg-amber-50/40 p-5 shadow-sm">
+                  <div className="mb-4 flex items-center gap-2 text-amber-900">
+                    <UserPlus className="h-5 w-5" />
+                    <h5 className="text-sm font-bold">New User Account</h5>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div>
+                      <label className="mb-1 block font-bold text-gray-700">Full Name *</label>
+                      <input required minLength={2} value={newUserName} onChange={(e) => setNewUserName(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block font-bold text-gray-700">Email Address *</label>
+                      <input required type="email" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block font-bold text-gray-700">Temporary Password *</label>
+                      <div className="relative">
+                        <input required minLength={8} type={showNewUserPassword ? 'text' : 'password'} value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 outline-none focus:ring-2 focus:ring-amber-600" />
+                        <button type="button" onClick={() => setShowNewUserPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" aria-label="Toggle temporary password visibility">
+                          {showNewUserPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block font-bold text-gray-700">Assigned Role *</label>
+                      <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value as User['role'])} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-600">
+                        <option value="ADMIN">Administrator</option>
+                        <option value="DATA_ENTRY">Data Entry Operator</option>
+                        <option value="REVIEWER">Reviewer</option>
+                        <option value="READONLY">Read Only</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block font-bold text-gray-700">Department / Office</label>
+                      <input value={newUserDepartment} onChange={(e) => setNewUserDepartment(e.target.value)} placeholder="General Administration" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block font-bold text-gray-700">Phone Number</label>
+                      <input type="tel" value={newUserPhone} onChange={(e) => setNewUserPhone(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-amber-600" />
+                    </div>
+                  </div>
+                  <div className="mt-5 flex items-center gap-2">
+                    <button type="submit" disabled={isCreatingUser} className="inline-flex items-center gap-2 rounded-lg bg-amber-700 px-5 py-2.5 font-bold text-white hover:bg-amber-800 disabled:opacity-60">
+                      <UserPlus className="h-4 w-4" />
+                      {isCreatingUser ? 'Creating User...' : 'Create User'}
+                    </button>
+                    <button type="button" onClick={() => { resetNewUserForm(); setShowCreateUser(false); }} className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-bold text-gray-700 hover:bg-gray-50">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {deleteTarget && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-5 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-xl bg-red-100 p-2 text-red-700"><Trash2 className="h-5 w-5" /></div>
+                      <div>
+                        <h5 className="text-sm font-bold text-red-900">Delete user account?</h5>
+                        <p className="mt-1 text-red-700">{getUserDisplayName(deleteTarget.name)} ({deleteTarget.email}) will permanently lose access.</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(240px,420px)_auto] sm:justify-between">
+                      <div>
+                        <label className="mb-1 block font-bold text-red-900">Enter your administrator password to confirm</label>
+                        <div className="relative">
+                          <input
+                            type={showDeleteAdminPassword ? 'text' : 'password'}
+                            value={deleteAdminPassword}
+                            onChange={(e) => setDeleteAdminPassword(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && deleteAdminPassword && !isDeletingUser) handleDeleteUser();
+                            }}
+                            autoComplete="current-password"
+                            className="w-full rounded-lg border border-red-300 bg-white px-3 py-2.5 pr-10 outline-none focus:ring-2 focus:ring-red-600"
+                            placeholder="Current admin password"
+                          />
+                          <button type="button" onClick={() => setShowDeleteAdminPassword((value) => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" aria-label="Toggle administrator password visibility">
+                            {showDeleteAdminPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-2">
+                        <button type="button" onClick={() => { setDeleteTarget(null); setDeleteAdminPassword(''); setShowDeleteAdminPassword(false); }} disabled={isDeletingUser} className="rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-bold text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="button" onClick={handleDeleteUser} disabled={isDeletingUser || !deleteAdminPassword} className="inline-flex items-center gap-2 rounded-lg bg-red-700 px-4 py-2.5 font-bold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50">
+                          <Trash2 className="h-4 w-4" />
+                          {isDeletingUser ? 'Verifying & Deleting...' : 'Confirm Delete'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="overflow-x-auto rounded-xl border shadow-sm">
+                <table className="w-full min-w-[860px] text-left">
                   <thead className="bg-gray-100 text-gray-700 uppercase font-bold border-b">
                     <tr>
                       <th className="py-2.5 px-3">Name</th>
@@ -388,6 +537,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                       <th className="py-2.5 px-3">Assigned Role</th>
                       <th className="py-2.5 px-3">Secretariat Department</th>
                       <th className="py-2.5 px-3 text-center">Status</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -407,9 +557,27 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                         </td>
                         <td className="py-2.5 px-3 text-gray-600">{u.department || 'General Administration'}</td>
                         <td className="py-2.5 px-3 text-center">
-                          <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                            Active
+                          <span className={`${u.isActive === false ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-800'} px-2 py-0.5 rounded-full text-[10px] font-bold`}>
+                            {u.isActive === false ? 'Inactive' : 'Active'}
                           </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          {u.role !== 'ADMIN' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUserMsg(null);
+                                setDeleteAdminPassword('');
+                                setShowDeleteAdminPassword(false);
+                                setDeleteTarget(u);
+                              }}
+                              title={`Delete ${getUserDisplayName(u.name)}`}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 font-bold text-red-700 transition hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -418,78 +586,6 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
               </div>
             </div>
           )}
-
-          {/* TAB 2: Categories */}
-          {activeTab === 'categories' && (
-            <div className="space-y-6">
-              {/* Form to add category */}
-              <form onSubmit={handleCreateCategory} className="bg-amber-50/50 border border-amber-200 rounded-xl p-4 flex flex-wrap gap-3 items-end">
-                <div className="w-56">
-                  <label className="block font-bold text-gray-700 mb-1">New Category Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Forest & Environment"
-                    value={newCatName}
-                    onChange={(e) => setNewCatName(e.target.value)}
-                    className="w-full border rounded-lg px-2.5 py-1.5 bg-white outline-none"
-                  />
-                </div>
-                <div className="w-36">
-                  <label className="block font-bold text-gray-700 mb-1">Code</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="CAT-FOREST"
-                    value={newCatCode}
-                    onChange={(e) => setNewCatCode(e.target.value)}
-                    className="w-full border rounded-lg px-2.5 py-1.5 bg-white outline-none font-mono"
-                  />
-                </div>
-                <div className="flex-grow">
-                  <label className="block font-bold text-gray-700 mb-1">Scope / Description</label>
-                  <input
-                    type="text"
-                    placeholder="Brief description of grievances handled under this category"
-                    value={newCatDesc}
-                    onChange={(e) => setNewCatDesc(e.target.value)}
-                    className="w-full border rounded-lg px-2.5 py-1.5 bg-white outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-lg transition"
-                >
-                  + Add Category
-                </button>
-              </form>
-
-              {/* Existing Categories Table */}
-              <div className="border rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-100 text-gray-700 uppercase font-bold border-b">
-                    <tr>
-                      <th className="py-2.5 px-3">Code</th>
-                      <th className="py-2.5 px-3">Category Name</th>
-                      <th className="py-2.5 px-3">Description</th>
-                      <th className="py-2.5 px-3 text-center">Associated Applications</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {categories.map((c) => (
-                      <tr key={c.id} className="hover:bg-amber-50/30">
-                        <td className="py-2.5 px-3 font-mono font-bold text-amber-800">{c.code}</td>
-                        <td className="py-2.5 px-3 font-bold text-gray-900">{c.name}</td>
-                        <td className="py-2.5 px-3 text-gray-600">{c.description || '-'}</td>
-                        <td className="py-2.5 px-3 text-center font-bold text-blue-700">{c._count?.applications || 0}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
 
         </div>
       </div>

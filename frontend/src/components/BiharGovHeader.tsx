@@ -29,6 +29,7 @@ interface BiharGovHeaderProps {
   onLogout: () => void;
   onOpenSection: (section: 'form' | 'table' | 'reports' | 'admin') => void;
   onGoHome: () => void;
+  onOpenMainHome?: () => void;
   onSearch?: (query: string) => void;
   activeNav?: string;
 }
@@ -41,6 +42,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
   onLogout,
   onOpenSection,
   onGoHome,
+  onOpenMainHome,
   onSearch,
   activeNav = 'home',
 }) => {
@@ -113,7 +115,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
           {/* 1. Home / मुख्य पृष्ठ Button (Moved to right corner) */}
           <button
             type="button"
-            onClick={onGoHome}
+            onClick={onOpenMainHome || onGoHome}
             className={`flex items-center gap-1.5 transition-all cursor-pointer px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-[13px] font-bold shadow-2xs ${
               activeNav === 'home'
                 ? 'bg-white/90 text-[#18327b] border border-slate-200/90 font-black shadow-xs'
@@ -244,7 +246,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
                     className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center gap-2 font-semibold"
                   >
                     <TableProperties className="w-3.5 h-3.5 text-[#18327b]" />
-                    <span>{language === 'hi' ? 'परियोजना रजिस्टर (11 क्षेत्र)' : 'Project Register (11 Fields)'}</span>
+                    <span>{language === 'hi' ? 'परियोजना रजिस्टर' : 'Project Register'}</span>
                   </button>
 
                   <button
@@ -326,7 +328,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
           {/* Links */}
           <div className="pt-1">
             <button
-              onClick={() => { onGoHome(); setMobileMenuOpen(false); }}
+              onClick={() => { (onOpenMainHome || onGoHome)(); setMobileMenuOpen(false); }}
               className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800 flex items-center gap-2 font-bold"
             >
               <Home className="w-4 h-4 text-[#18327b]" />

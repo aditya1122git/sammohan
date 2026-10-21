@@ -498,55 +498,31 @@ export const SankalpLanding: React.FC<SankalpLandingProps> = ({
             })}
           </div>
 
-          {/* 48 Department Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredDepartments.map((dept) => {
-              return (
-                <article
-                  key={dept.id}
-                  className="group bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-[#18327b]/40 shadow-xs hover:shadow-lg transition-all duration-300 cursor-default flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-white border border-slate-200/90 flex items-center justify-center p-1 transition-all group-hover:scale-110 shadow-xs overflow-hidden">
-                        <img
-                          src={dept.logoUrl || `/images/departments/dept_${dept.id}.svg`}
-                          alt={dept.nameHi}
-                          className="w-full h-full object-contain filter drop-shadow-xs"
-                          loading="lazy"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.onerror = null;
-                            target.src = '/images/bihar-government-logo.png';
-                          }}
-                        />
-                      </div>
-                      <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 group-hover:bg-[#18327b] group-hover:text-white transition-colors">
-                        #{String(dept.id).padStart(2, '0')}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#18327b] transition-colors leading-snug">
-                        {language === 'hi' ? dept.nameHi : dept.nameEn}
-                      </h3>
-                      <div className="text-[11px] font-medium text-slate-400 mt-0.5">
-                        {language === 'hi' ? dept.nameEn : dept.nameHi}
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                      {language === 'hi' ? dept.summaryHi : dept.summaryEn}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-400 group-hover:text-[#ea580c] transition-colors">
-                    <span>{language === 'hi' ? 'विभागीय समीक्षा' : 'Department Overview'}</span>
-                    <i className="fa-solid fa-circle-info text-xs" aria-hidden="true" />
-                  </div>
-                </article>
-              );
-            })}
+          {/* Compact department app icons, matching the authenticated dashboard */}
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+            {filteredDepartments.map((dept) => (
+              <article
+                key={dept.id}
+                title={language === 'hi' ? dept.nameHi : dept.nameEn}
+                className="group flex min-h-[112px] flex-col items-center justify-center rounded-2xl border border-slate-200/90 bg-white px-2 py-3 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#18327b]/35 hover:shadow-lg"
+              >
+                <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-md transition-transform duration-200 group-hover:scale-105 sm:h-14 sm:w-14">
+                  <img
+                    src={dept.logoUrl || `/images/departments/dept_${dept.id}.svg`}
+                    alt=""
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = '/images/bihar-government-logo.png';
+                    }}
+                  />
+                </span>
+                <span className="mt-2 line-clamp-2 text-[11px] font-bold leading-snug text-slate-800 transition-colors group-hover:text-[#18327b] sm:text-xs">
+                  {language === 'hi' ? dept.nameHi : dept.nameEn}
+                </span>
+              </article>
+            ))}
           </div>
 
         </div>

@@ -17,7 +17,6 @@ import {
   Layers,
   Filter,
   Clock,
-  ArrowUpRight,
   ChevronRight,
   X,
   Trash2,
@@ -96,7 +95,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
   // Active Department Modal
   const [activeDept, setActiveDept] = useState<BiharDepartment | null>(null);
-  const [modalTab, setModalTab] = useState<'profile' | 'projects' | 'edit'>('profile');
+  const [modalTab, setModalTab] = useState<'profile' | 'projects' | 'edit' | 'add'>('profile');
 
   // Stored Profiles (Overrides from localStorage)
   const [customProfiles, setCustomProfiles] = useState<Record<number, DepartmentProfileData>>({});
@@ -531,101 +530,34 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
       </div>
 
-      {/* 3. Grid of 48 Department Icons / Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* 3. Compact app-style department launcher */}
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
         {filteredDepartments.map((dept) => {
           const profile = getDepartmentProfile(dept.id);
-          const deptProjects = getDepartmentProjects(dept);
-          const DeptIcon = dept.icon;
-
           return (
-            <div
+            <button
+              type="button"
               key={dept.id}
               onClick={() => handleOpenDept(dept, 'profile')}
-              className="group bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 hover:border-[#18327b]/50 shadow-xs hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden transform hover:-translate-y-1"
+              title={language === 'hi' ? dept.nameHi : dept.nameEn}
+              className="group flex min-h-[112px] flex-col items-center justify-center rounded-2xl border border-slate-200/90 bg-white px-2 py-3 text-center shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#18327b]/35 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#18327b] focus-visible:ring-offset-2"
             >
-              {/* Subtle gradient strip on top of card */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-[#18327b] to-[#f97316] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-              <div>
-                {/* Header Row: Circular Icon Badge + Code + Index */}
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  
-                  {/* Department Emblem Logo Photo */}
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200/90 flex items-center justify-center p-1 shadow-xs group-hover:scale-110 group-hover:border-[#18327b]/50 group-hover:shadow-md transition-all duration-300 overflow-hidden">
-                      <img
-                        src={profile.logoUrl || `/images/departments/dept_${dept.id}.svg`}
-                        alt={dept.nameHi}
-                        className="w-full h-full object-contain filter drop-shadow-xs"
-                        loading="lazy"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.onerror = null;
-                          target.src = '/images/bihar-government-logo.png';
-                        }}
-                      />
-                    </div>
-                    {/* Tiny state badge indicator */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-white flex items-center justify-center shadow-xs">
-                      <span className="text-[8px] font-black text-slate-900">★</span>
-                    </div>
-                  </div>
-
-                  {/* Index and Code */}
-                  <div className="text-right">
-                    <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 group-hover:bg-blue-50 text-slate-600 group-hover:text-[#18327b] font-mono transition">
-                      #{dept.id.toString().padStart(2, '0')} • {dept.code}
-                    </span>
-                    <div className="text-[10px] text-slate-400 mt-1 capitalize font-medium">
-                      {dept.category === 'admin' && 'प्रशासन'}
-                      {dept.category === 'infra' && 'अवसंरचना'}
-                      {dept.category === 'welfare' && 'कल्याण'}
-                      {dept.category === 'agri' && 'कृषि/ग्रामीण'}
-                      {dept.category === 'edu' && 'शिक्षा/उद्योग'}
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Primary Hindi Name */}
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#18327b] transition-colors leading-snug line-clamp-1">
-                  {dept.nameHi}
-                </h3>
-                
-                {/* English Name */}
-                <p className="text-[11px] text-slate-500 font-medium line-clamp-1 mt-0.5">
-                  {dept.nameEn}
-                </p>
-
-                {/* Summary */}
-                <p className="text-[11px] text-slate-500 line-clamp-2 mt-2 leading-relaxed">
-                  {language === 'hi' ? dept.summaryHi : dept.summaryEn}
-                </p>
-              </div>
-
-              {/* Bottom Footer: Budget + Projects Count + Action Button */}
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                
-                {/* Budget Badge */}
-                <div className="flex items-center gap-1 text-[11px] font-extrabold text-slate-800">
-                  <span className="text-amber-600">₹</span>
-                  <span>{profile.annualBudgetCr.toLocaleString()} Cr</span>
-                </div>
-
-                {/* Project Count Pill */}
-                <div className="flex items-center gap-1.5">
-                  <span className="px-2 py-0.5 rounded-lg bg-blue-50 group-hover:bg-[#18327b] text-[#18327b] group-hover:text-white text-[10px] font-bold transition">
-                    {deptProjects.length} {language === 'hi' ? 'परियोजनाएं' : 'Projects'}
-                  </span>
-                  <div className="w-6 h-6 rounded-lg bg-slate-100 group-hover:bg-amber-400 group-hover:text-slate-900 flex items-center justify-center text-slate-500 transition">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
+              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-md transition-transform duration-200 group-hover:scale-105 sm:h-14 sm:w-14">
+                <img
+                  src={profile.logoUrl || `/images/departments/dept_${dept.id}.svg`}
+                  alt=""
+                  className="h-full w-full object-contain"
+                  loading="lazy"
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = '/images/bihar-government-logo.png';
+                  }}
+                />
+              </span>
+              <span className="mt-2 line-clamp-2 text-[11px] font-bold leading-snug text-slate-800 transition-colors group-hover:text-[#18327b] sm:text-xs">
+                {language === 'hi' ? dept.nameHi : dept.nameEn}
+              </span>
+            </button>
           );
         })}
       </div>
@@ -733,7 +665,9 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                 </button>
 
                 <button
-                  onClick={() => setModalTab('edit')}
+                  onClick={() => {
+                    setModalTab('edit');
+                  }}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                     modalTab === 'edit'
                       ? 'bg-amber-400 text-slate-900 shadow-md'
@@ -902,7 +836,9 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                       </button>
 
                       <button
-                        onClick={() => setModalTab('edit')}
+                        onClick={() => {
+                          setModalTab('edit');
+                        }}
                         className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-900 text-xs font-bold transition shadow-sm"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -934,7 +870,9 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                       </div>
 
                       <button
-                        onClick={() => setModalTab('edit')}
+                        onClick={() => {
+                          setModalTab('add');
+                        }}
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#18327b] hover:bg-[#12245a] text-white text-xs font-bold transition shadow-sm"
                       >
                         <Plus className="w-4 h-4 text-amber-300" />
@@ -1035,7 +973,9 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                             : 'You can immediately add a new project under this department using the Edit & Add Data tab.'}
                         </p>
                         <button
-                          onClick={() => setModalTab('edit')}
+                          onClick={() => {
+                            setModalTab('add');
+                          }}
                           className="mt-4 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-900 text-xs font-bold transition shadow-sm"
                         >
                           {language === 'hi' ? '+ पहली परियोजना दर्ज करें' : '+ Add First Project'}
@@ -1047,12 +987,12 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                 );
               })()}
 
-              {/* TAB 3: EDIT DEPARTMENT PROFILE & ADD NEW PROJECT */}
-              {modalTab === 'edit' && (
+              {/* TAB 3/4: EDIT DEPARTMENT PROFILE OR ADD NEW PROJECT */}
+              {(modalTab === 'edit' || modalTab === 'add') && (
                 <div className="space-y-8">
                   
                   {/* PART A: EDIT DEPARTMENT MASTER PROFILE */}
-                  <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-5">
+                  <div className={`${modalTab === 'edit' ? 'block' : 'hidden'} bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-5`}>
                     
                     <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                       <div>
@@ -1188,7 +1128,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
                     </div>
 
-                    <div className="flex justify-end pt-2">
+                    <div className="flex flex-wrap justify-end gap-2 pt-2">
                       <button
                         type="button"
                         onClick={handleSaveProfile}
@@ -1203,6 +1143,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                   </div>
 
                   {/* PART B: ADD NEW PROJECT / ANNOUNCEMENT TO THIS DEPARTMENT */}
+                  {modalTab === 'add' && (
                   <form onSubmit={handleCreateProjectForDept} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-5">
                     
                     <div className="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -1394,6 +1335,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
                     </div>
 
                   </form>
+                  )}
 
                 </div>
               )}

@@ -144,6 +144,35 @@ export const api = {
     return data;
   },
 
+  async createUser(payload: {
+    name: string;
+    email: string;
+    password: string;
+    role: User['role'];
+    department?: string;
+    phone?: string;
+  }): Promise<{ user: User }> {
+    const res = await fetch(`${API_BASE}/auth/users`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to create user');
+    return data;
+  },
+
+  async deleteUser(userId: number, currentPassword: string): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/auth/users/${userId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+      body: JSON.stringify({ currentPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete user');
+    return data;
+  },
+
   // --- Master Data ---
   async getDistricts(): Promise<{ districts: District[] }> {
     const res = await fetch(`${API_BASE}/master/districts`);

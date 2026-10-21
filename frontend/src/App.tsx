@@ -547,6 +547,21 @@ export const App: React.FC = () => {
           window.dispatchEvent(new Event('sammohan:dashboard-home'));
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        onOpenMainHome={() => {
+          setActiveModal(null);
+          setLoginModalOpen(false);
+          setSelectedApp(null);
+          setDetailAppId(null);
+          setRbacNotice(null);
+          setIsProjectTableOpen(false);
+          setIsProjectFormOpen(false);
+          setEditingProject(null);
+          setIsProjectDetailOpen(false);
+          setSelectedProject(null);
+          setActiveView('landing');
+          window.history.pushState({}, '', '/');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         onSearch={(_query) => {
           setProjectTableTab('all');
           setIsProjectTableOpen(true);
@@ -716,7 +731,7 @@ export const App: React.FC = () => {
                 className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition transform active:scale-95 cursor-pointer"
               >
                 <TableProperties className="w-4 h-4" />
-                <span>{language === 'hi' ? 'परियोजना रजिस्टर (11 क्षेत्र)' : 'Project Register (11 Fields)'}</span>
+                <span>{language === 'hi' ? 'परियोजना रजिस्टर' : 'Project Register'}</span>
               </button>
 
               <button
@@ -900,12 +915,12 @@ export const App: React.FC = () => {
                 </div>
                 <h3 className="text-base font-bold text-slate-900">
                   {/* Personal Database Desk */}
-                  {language === 'hi' ? 'परियोजना डेटाबेस रजिस्टर (11 क्षेत्र)' : 'Personal Database Desk — Project Register (11 Fields)'}
+                  {language === 'hi' ? 'परियोजना डेटाबेस रजिस्टर' : 'Personal Database Desk — Project Register'}
                 </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   {language === 'hi'
                     ? 'संदर्भ आईडी, विभाग, प्रतिबद्धता, स्थान, वित्तीय स्थिति, वर्तमान चरण, सत्यापित प्रगति, आगामी माइलस्टोन एवं CSV निर्यात।'
-                    : 'Search, filter, inspect 11 official fields, update milestone delivery, and export CSV audit reports across 38 districts.'}
+                    : 'Search, filter, inspect official project records, update milestone delivery, and export CSV audit reports across 38 districts.'}
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#18327b]">

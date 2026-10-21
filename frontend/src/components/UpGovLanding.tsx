@@ -1417,7 +1417,7 @@ export const UpGovLanding: React.FC<UpGovLandingProps> = ({
                         </div>
                       </div>
 
-                      {/* Card Content with 11 Fields */}
+                  {/* Card content */}
                       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4">
                         
                         {/* 3. Commitment (Title & Details) */}
