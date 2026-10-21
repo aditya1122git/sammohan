@@ -646,7 +646,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
 
       {/* Full-page department workspace */}
       {activeDept && (
-        <div className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-hidden bg-white sm:top-[70px] animate-fadeIn">
+        <div className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-hidden overscroll-none bg-white sm:top-[70px] animate-fadeIn">
           <section className="flex h-full min-w-0 w-full flex-col overflow-hidden bg-white" aria-label="Department details">
             
             {/* Page Header */}
@@ -738,7 +738,7 @@ export const BiharDepartmentsDashboardHub: React.FC<BiharDepartmentsDashboardHub
             </div>
 
             {/* Page Body */}
-            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-slate-50">
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-slate-50">
               <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 p-4 sm:p-7 lg:p-8">
               
               {/* TAB 1: COMPLETE DEPARTMENT PROFILE */}

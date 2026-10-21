@@ -75,7 +75,8 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
   };
 
   return (
-    <header className="relative bg-white border-b border-slate-200/90 sticky top-0 z-50 shadow-2xs">
+    <>
+    <header className="fixed inset-x-0 top-0 z-[60] bg-white border-b border-slate-200/90 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-[70px] flex items-center justify-between gap-3 sm:gap-6">
         
         {/* ========================================================= */}
@@ -357,5 +358,7 @@ export const BiharGovHeader: React.FC<BiharGovHeaderProps> = ({
         </div>
       )}
     </header>
+    <div className="h-16 flex-none sm:h-[70px]" aria-hidden="true" />
+    </>
   );
 };

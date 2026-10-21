@@ -153,7 +153,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
       <div className="bg-white w-full h-full overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-amber-700 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
@@ -214,7 +214,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
         </div>
 
         {/* Body Content */}
-        <div className="p-6 overflow-y-auto flex-grow text-xs">
+        <div className="p-6 overflow-y-auto overscroll-contain flex-grow text-xs">
           {/* TAB 1: Admin Profile */}
           {activeTab === 'profile' && currentUser && (
             <div className={`grid grid-cols-1 gap-6 ${showPasswordCard ? 'xl:grid-cols-2 max-w-6xl' : 'max-w-3xl'}`}>

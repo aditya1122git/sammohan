@@ -239,7 +239,7 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden bg-white">
+    <div className="fixed inset-x-0 bottom-0 top-16 sm:top-[70px] z-40 overflow-hidden overscroll-none bg-white">
       <div className="relative bg-white w-full h-full flex flex-col overflow-hidden">
         
         {/* Modal Top Header */}
@@ -433,7 +433,7 @@ export const ProjectTableModal: React.FC<ProjectTableModalProps> = ({
         </div>
 
         {/* Table Content Area */}
-        <div className="flex-1 overflow-auto bg-white">
+        <div className="flex-1 overflow-auto overscroll-contain bg-white">
           {isLoading ? (
             <div className="p-16 text-center text-slate-500 space-y-3">
               <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
